@@ -1,8 +1,8 @@
 {
   "openapi": "3.1.0",
   "info": {
-    "title": "OpenAPI Plant Store",
-    "description": "A sample API that uses a plant store as an example to demonstrate features in the OpenAPI specification",
+    "title": "Kastle API",
+    "description": "OpenAPI specification for the Kastle API",
     "license": {
       "name": "MIT"
     },
@@ -10,7 +10,7 @@
   },
   "servers": [
     {
-      "url": "http://sandbox.mintlify.com"
+      "url": "https://api.kastle.ai"
     }
   ],
   "security": [
@@ -19,72 +19,74 @@
     }
   ],
   "paths": {
-    "/plants": {
+    "/api/v1/calls": {
       "get": {
-        "description": "Returns all plants from the system that the user has access to",
+        "description": "Returns all calls from the system that the user has access to",
         "parameters": [
           {
             "name": "limit",
             "in": "query",
-            "description": "The maximum number of results to return",
+            "description": "The maximum number of results to return (if not provided, the default is 100)",
             "schema": {
               "type": "integer",
               "format": "int32"
+            }
+          },
+          {
+            "name": "next_token",
+            "in": "query",
+            "description": "Token for pagination (if not provided, it starts from the first page with a next token of 0)",
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "from_timestamp",
+            "in": "query",
+            "description": "Start timestamp for filtering calls (Unix timestamp)",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          },
+          {
+            "name": "to_timestamp",
+            "in": "query",
+            "description": "End timestamp for filtering calls (Unix timestamp)",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
             }
           }
         ],
         "responses": {
           "200": {
-            "description": "Plant response",
+            "description": "Successfully retrieved list of calls",
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/Plant"
+                  "type": "object",
+                  "properties": {
+                    "calls": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/Call"
+                      }
+                    },
+                    "next_token": {
+                      "type": "integer",
+                      "description": "Token for fetching the next page of results"
+                    }
                   }
                 }
               }
             }
           },
           "400": {
-            "description": "Unexpected error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Error"
-                }
-              }
-            }
-          }
-        }
-      },
-      "post": {
-        "description": "Creates a new plant in the store",
-        "requestBody": {
-          "description": "Plant to add to the store",
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/NewPlant"
-              }
-            }
-          },
-          "required": true
-        },
-        "responses": {
-          "200": {
-            "description": "plant response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Plant"
-                }
-              }
-            }
-          },
-          "400": {
-            "description": "unexpected error",
+            "description": "Bad request",
             "content": {
               "application/json": {
                 "schema": {
@@ -96,28 +98,43 @@
         }
       }
     },
-    "/plants/{id}": {
-      "delete": {
-        "description": "Deletes a single plant based on the ID supplied",
+    "/api/v1/calls/{call_id}": {
+      "get": {
+        "description": "Returns detailed information about a specific call",
         "parameters": [
           {
-            "name": "id",
+            "name": "call_id",
             "in": "path",
-            "description": "ID of plant to delete",
+            "description": "Unique identifier of the call to retrieve",
             "required": true,
             "schema": {
-              "type": "integer",
-              "format": "int64"
+              "type": "string"
             }
           }
         ],
         "responses": {
-          "204": {
-            "description": "Plant deleted",
-            "content": {}
+          "200": {
+            "description": "Successfully retrieved call details",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FullCallDetails"
+                }
+              }
+            }
           },
           "400": {
-            "description": "unexpected error",
+            "description": "Bad request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Call not found",
             "content": {
               "application/json": {
                 "schema": {
@@ -130,66 +147,8 @@
       }
     }
   },
-  "webhooks": {
-    "/plant/webhook": {
-      "post": {
-        "description": "Information about a new plant added to the store",
-        "requestBody": {
-          "description": "Plant added to the store",
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/NewPlant"
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "Return a 200 status to indicate that the data was received successfully"
-          }
-        }
-      }
-    }
-  },
   "components": {
     "schemas": {
-      "Plant": {
-        "required": [
-          "name"
-        ],
-        "type": "object",
-        "properties": {
-          "name": {
-            "description": "The name of the plant",
-            "type": "string"
-          },
-          "tag": {
-            "description": "Tag to specify the type",
-            "type": "string"
-          }
-        }
-      },
-      "NewPlant": {
-        "allOf": [
-          {
-            "$ref": "#/components/schemas/Plant"
-          },
-          {
-            "required": [
-              "id"
-            ],
-            "type": "object",
-            "properties": {
-              "id": {
-                "description": "Identification number of the plant",
-                "type": "integer",
-                "format": "int64"
-              }
-            }
-          }
-        ]
-      },
       "Error": {
         "required": [
           "error",
@@ -205,6 +164,130 @@
             "type": "string"
           }
         }
+      },
+      "Call": {
+        "type": "object",
+        "properties": {
+          "call_id": {
+            "type": "string",
+            "description": "Unique identifier for the call"
+          },
+          "from_number": {
+            "type": "string",
+            "description": "Phone number that initiated the call",
+            "example": "+19098765432"
+          },
+          "to_number": {
+            "type": "string",
+            "description": "Phone number that received the call",
+            "example": "+19876543210"
+          },
+          "call_duration": {
+            "type": "integer",
+            "description": "Duration of the call in seconds"
+          },
+          "call_status": {
+            "type": "string",
+            "enum": ["ai_ended_call", "user_ended_call", "transferred", "voicemail", "no_answer", "failed"],
+            "description": "Status of the call"
+          },
+          "call_time": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Unix timestamp when the call was initiated"
+          },
+          "loan_id": {
+            "type": "string",
+            "description": "(Optional) Identifier for the associated loan (if the call is associated with a borrower with a specific loan)",
+            "example": "1234567890"
+          },
+          "order_id": {
+            "type": "string",
+            "description": "(Optional) Identifier for the associated order (if the call is associated with an appraisal order)",
+            "example": "1234567890"
+          }
+        }
+      },
+      "FullCallDetails": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/Call"
+          },
+          {
+            "type": "object",
+            "required": [
+              "summarizations",
+              "extracted_vars",
+              "call_transcript"
+            ],
+            "properties": {
+              "summarizations": {
+                "type": "object",
+                "description": "Various types of call summarizations",
+                "additionalProperties": {
+                  "type": "string"
+                },
+                "example": {
+                  "call_summary": "Customer called about loan refinancing options",
+                  "three_word_summary": "Refinancing"
+                }
+              },
+              "extracted_vars": {
+                "type": "object",
+                "description": "Key variables extracted from the call",
+                "additionalProperties": {
+                  "type": ["string", "boolean"]
+                },
+                "example": {
+                  "rpc": true,
+                  "payment_amount": 1234.56,
+                  "payment_due_date": "2024-01-01"
+                }
+              },
+              "call_reason": {
+                "type": "string",
+                "description": "Reason for the call as determined by the AI",
+                "example": "Refinance Inquiry"
+              },
+              "transfer_reason": {
+                "type": "string",
+                "description": "(Optional) Reason the call was transferred as determined by the AI. This field is only present if the call was transferred.",
+                "example": "Loan Payoff Request"
+              },
+              "call_transcript": {
+                "type": "array",
+                "description": "Full transcript of the call in OpenAI chat format",
+                "items": {
+                  "type": "object",
+                  "required": ["role", "content"],
+                  "properties": {
+                    "role": {
+                      "type": "string",
+                      "enum": ["user", "assistant"]
+                    },
+                    "content": {
+                      "type": "string"
+                    }
+                  }
+                },
+                "example": [
+                  {
+                    "role": "assistant",
+                    "content": "Hello, this is Kastle. How can I help you today?"
+                  },
+                  {
+                    "role": "user",
+                    "content": "Hi, I'm calling about refinancing my loan."
+                  }
+                ]
+              },
+              "customer_contact_id": {
+                "type": "string",
+                "description": "(Optional) The unique identifier for this call as maintained in the customer's system"
+              }
+            }
+          }
+        ]
       }
     },
     "securitySchemes": {
