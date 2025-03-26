@@ -1,0 +1,367 @@
+{
+    "openapi": "3.1.0",
+    "info": {
+      "title": "Shellpoint API",
+      "description": "OpenAPI specification for the Shellpoint API endpoints",
+      "license": {
+        "name": "MIT"
+      },
+      "version": "1.0.0"
+    },
+    "servers": [
+      {
+        "url": "https://api.kastle.ai"
+      }
+    ],
+    "security": [
+      {
+        "bearerAuth": []
+      }
+    ],
+    "paths": {
+      "/shellpoint/get_transfer_reason": {
+        "get": {
+          "description": "Returns transfer reason information for a caller",
+          "parameters": [
+            {
+              "name": "ANI",
+              "in": "query",
+              "description": "Phone number that initiated the call",
+              "required": true,
+              "schema": {
+                "type": "string"
+              }
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "Successfully retrieved transfer reason data",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/TransferReasonResponse"
+                  }
+                }
+              }
+            },
+            "401": {
+              "description": "Unauthorized",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/Error"
+                  }
+                }
+              }
+            },
+            "500": {
+              "description": "Server error",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/Error"
+                  }
+                }
+              }
+            }
+          },
+          "security": [
+            {
+              "bearerAuth": []
+            }
+          ]
+        }
+      },
+      "/shellpoint/get_transfer_reason/dev": {
+        "get": {
+          "description": "Returns transfer reason information for a caller in development environment",
+          "parameters": [
+            {
+              "name": "ANI",
+              "in": "query",
+              "description": "Phone number that initiated the call",
+              "required": true,
+              "schema": {
+                "type": "string"
+              }
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "Successfully retrieved transfer reason data",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/TransferReasonResponse"
+                  }
+                }
+              }
+            },
+            "401": {
+              "description": "Unauthorized",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/Error"
+                  }
+                }
+              }
+            },
+            "500": {
+              "description": "Server error",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/Error"
+                  }
+                }
+              }
+            }
+          },
+          "security": [
+            {
+              "bearerAuth": []
+            }
+          ]
+        }
+      },
+      "/shellpoint/call_data": {
+        "post": {
+          "description": "Stores call data information for a caller in production environment",
+          "requestBody": {
+            "required": true,
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CallDataRequest"
+                }
+              }
+            }
+          },
+          "responses": {
+            "200": {
+              "description": "Successfully stored call data",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "type": "object",
+                    "properties": {}
+                  }
+                }
+              }
+            },
+            "401": {
+              "description": "Unauthorized",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/Error"
+                  }
+                }
+              }
+            }
+          },
+          "security": [
+            {
+              "bearerAuth": []
+            }
+          ]
+        }
+      },
+      "/shellpoint/call_data/dev": {
+        "post": {
+          "description": "Stores call data information for a caller in development environment",
+          "requestBody": {
+            "required": true,
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CallDataRequest"
+                }
+              }
+            }
+          },
+          "responses": {
+            "200": {
+              "description": "Successfully stored call data",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "type": "object",
+                    "properties": {}
+                  }
+                }
+              }
+            },
+            "401": {
+              "description": "Unauthorized",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/Error"
+                  }
+                }
+              }
+            }
+          },
+          "security": [
+            {
+              "bearerAuth": []
+            }
+          ]
+        }
+      },
+      "/shellpoint/wait_for_caller_data": {
+        "post": {
+          "description": "Wait for caller data to be available",
+          "requestBody": {
+            "required": true,
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": ["phone_number"],
+                  "properties": {
+                    "phone_number": {
+                      "type": "string",
+                      "description": "Phone number that initiated the call"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "responses": {
+            "200": {
+              "description": "Successfully retrieved caller data",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "type": "object",
+                    "properties": {
+                      "success": {
+                        "type": "boolean"
+                      },
+                      "call_id": {
+                        "type": "string",
+                        "description": "Unique identifier for the call"
+                      },
+                      "entity_id": {
+                        "type": "string",
+                        "description": "Entity identifier associated with the call"
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "401": {
+              "description": "Unauthorized",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/Error"
+                  }
+                }
+              }
+            },
+            "500": {
+              "description": "Server error",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/Error"
+                  }
+                }
+              }
+            }
+          },
+          "security": [
+            {
+              "bearerAuth": []
+            }
+          ]
+        }
+      }
+    },
+    "components": {
+      "schemas": {
+        "Error": {
+          "type": "object",
+          "properties": {
+            "error": {
+              "type": "string"
+            }
+          }
+        },
+        "TransferReasonResponse": {
+          "type": "object",
+          "properties": {
+            "transfer_reason": {
+              "type": "integer",
+              "description": "Reason code for the transfer"
+            },
+            "max_agent_notes": {
+              "type": "string",
+              "description": "Maximum notes for agent"
+            },
+            "Newskill": {
+              "type": "string",
+              "description": "New skill identifier"
+            },
+            "LoanID": {
+              "type": "string",
+              "description": "Loan identifier"
+            },
+            "MasterID": {
+              "type": "string",
+              "description": "Master contact identifier"
+            }
+          }
+        },
+        "CallDataRequest": {
+          "type": "object",
+          "required": [
+            "ContactID",
+            "PASSPHRASE",
+            "ANI",
+            "LoanID",
+            "Newskill",
+            "MESSAGE"
+          ],
+          "properties": {
+            "ContactID": {
+              "type": "string",
+              "description": "Unique contact identifier"
+            },
+            "PASSPHRASE": {
+              "type": "string",
+              "description": "Authentication passphrase"
+            },
+            "ANI": {
+              "type": "string",
+              "description": "Phone number that initiated the call"
+            },
+            "LoanID": {
+              "type": "string",
+              "description": "Loan identifier"
+            },
+            "Newskill": {
+              "type": "string",
+              "description": "New skill identifier"
+            },
+            "MESSAGE": {
+              "type": "string",
+              "description": "Message content"
+            }
+          }
+        }
+      },
+      "securitySchemes": {
+        "bearerAuth": {
+          "type": "http",
+          "scheme": "bearer"
+        }
+      }
+    }
+  }
