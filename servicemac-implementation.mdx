@@ -677,98 +677,101 @@ Below is a comprehensive schedule breaking down all key activities from March th
 GET /api/loans/{loanId}
 Response:
 {
-  "loanId": "0674804091",
-  "loanStatus": {
-    "principalBalance": 1062681.48,
-    "escrowBalance": 5287.22,
-    "interestRate": 0.02875,
-    "monthlyPayment": 6077.27,
-    "totalPaymentDue": 6077.27,
-    "nextPaymentDueDate": "2024-11-01T00:00:00",
-    "lastPaymentDate": "2024-10-01T00:00:00",
-    "lastPaymentAmount": 5986.39,
-    "paymentType": 0,
-    "canMakePartialPayment": true,
-    "paymentsOverdueCount": 0,
-    "nextPaymentAmount": 6077.27
-  },
-  "balances": {
-    "principalBalance": 1062681.48,
-    "escrowBalance": 5287.22,
-    "feesBalance": 0.00,
-    "lateChargesBalance": 0.00,
-    "totalAmountDue": 6077.27
-  },
-  "paymentOptions": {
-    "canMakePrincipalAndInterest": true,
-    "canPayAdditionalPrincipal": true,
-    "canPayAdditionalEscrow": true,
-    "canPayLateCharges": true,
-    "isPaymentRequired": true,
-    "maxPaymentsAllowed": 12,
-    "minPaymentsRequired": 1
-  },
-  "loanDetails": {
-    "loanType": 0,
-    "servicerId": 1,
-    "loanAddDate": "2021-11-02T00:00:00",
-    "acquiredFrom": "8349",
-    "lastEscrowAnalysisDate": "2024-09-04T00:00:00",
-    "lastInsurancePaymentDate": "2024-07-30T00:00:00",
-    "isBusinessPurposeLoan": false,
-    "investorRefiEligible": 0
-  },
-  "borrowers": [
-    {
-      "borrowerId": 1,
-      "firstName": "JOHN",
-      "lastName": "DOE",
-      "taxIdLastFour": "1234",
-      "zip": "94101"
-    }
-  ],
-  "property": {
-    "address": "123 MAIN ST",
-    "city": "SAN FRANCISCO",
-    "state": "CA",
-    "zip": "94101"
-  },
-  "mailingAddress": {
-    "address": "123 MAIN ST",
-    "city": "SAN FRANCISCO",
-    "state": "CA",
-    "zip": "94101"
-  },
-  "accounts": [
-    {
-      "accountNumberLastFour": "8161",
-      "routingNumber": "021100361",
-      "accountType": 0,
-      "isPreferred": true
-    }
-  ],
-  "preferences": {
-    "isWebRegistered": false,
-    "isPaperlessBilling": true,
-    "hasAutomaticPayments": true,
-    "phonePaymentAllowed": true,
-    "askForCellPhonePermission": false
-  },
-  "flags": {
-    "hasReturnedMail": false,
-    "hasBankruptcyExclusion": false,
-    "snowflakeAvailable": true
-  },
-  "paymentHistory": [
-    {
-      "paymentDate": "2024-10-01T00:00:00",
-      "amount": 5986.39,
-      "type": "Regular Payment",
-      "status": "Posted",
-      "confirmationNumber": "PMT67890123"
-    },
-    //last 6 months
-  ]
+  "isAuthenticated": true,   
+  "systemResponse": "Account Authenticated",   
+  "currentDate": "2025-04-25",   
+  "accountData":{
+	  "zipCode": "94518",     
+	  "phoneNumber": "(555) 849-6555",     
+	  "borrowerName": "AMY ELIZABETH KASTLE",     
+	  "coBorrowerName": "ERIC ROY KASTLE",     
+	  "propertyAddress": "1571 FRUIT ST, CONCORD, CA 94518",     
+	  "verificationCode": "1234",     
+	  "lastPaymentDate": "2025-04-01",     
+	  "lastPaymentAmount": 2000,     
+	  "loanBalance": 154095.52,     
+	  "loanPaidInFull": null,     
+	  "emailAddress": "EKastle24@att.net",     
+	  "interestRate": "2.7500000",     
+	  "nextPaymentDueDate": "2025-05-01",     
+	  "lastAnalysisDate": null,     
+	  "pifStopCode": 0,     
+	  "loanType": 3,     
+	  "isInBankruptcy": false,     
+	  "bankruptcyChapter": null,     
+	  "escrowBalance": 0,     
+	  "lastTaxDisbursementDate": null,     
+	  "lastTaxDisbursementAmount": null,     
+	  "lastInsuranceDisbursementDate": null,     
+	  "lastInsuranceDisbursementAmount": null,     
+	  "lastEscrowRefundDisbursementDate": null,     
+	  "lastEscrowRefundDisbursementAmount": null,     
+	  "ytdInterestPaidAmount": 1450.12,     
+	  "ytdTaxesPaidAmount": 0,     
+	  "priorYearInterestPaidAmount": 4706.36,     
+	  "priorYearTaxPaidAmount": 0,     
+	  "primaryPhoneNumber": "5558496555",     
+	  "secondaryPhoneNumber": "5559417927",     
+	  "thirdPartyPhoneNumber": null,     
+	  "plsClientId": null,     
+	  "smClientId": 83,     
+	  "billingZipCode": "94518",     
+	  "propertyAlphaStateCode": "CA",     
+	  "lastPayoffRequestDate": null,     
+	  "retentionEligible": null,     
+	  "paymentAmount": 1642.26,     
+	  "isHeloc": false,     
+	  "isOseSpanish": true,     
+	  "servicingSoldId": null,     
+	  "autoSkill": "IB-CSO-001-EN",     
+	  "loanNumber": "8014011111",     
+	  "propertyZipCode": "94518",     
+	  "mortgagorSsNumberLast4": 1111,     
+	  "coMortgagorSsNumberLast4": 1111,     
+	  "isPreboardLoan": false,     
+	  "isActiveFemaDisasterArea": null,     
+	  "mtgrEmail": "EKastle24@att.net",     
+	  "coMtgrEmail": null,     
+	  "primaryPhoneCode": "BH",     
+	  "secondaryPhoneCode": null,     
+	  "thirdPartyPhoneCode": null,     
+	  "servicingSoldDate": null,     
+	  "newServicerName": null,     
+	  "hasBorrowerCalledInLast30Days": null,     
+	  "newServicerPhoneNumber": null,     
+	  "payoffRequestEligible": true,     
+	  "escrowOverageShortageOfLastAnalysis": 0,     
+	  "nextEscrowAnalysis": "2026-01-01",     
+	  "isEmployeeLoan": false,     
+	  "isAddressConfidential": false,     
+	  "skillDepartment": "CS",     
+	  "skillPlsBrand": "001",     
+	  "skillOffshore": true,     
+	  "skillSubDepartment": null,     
+	  "femaCode": null,     
+	  "callCount30Days": 1,     
+	  "isNonMonetaryDefault": false, 
+	  "yearEnd1098StatementDocumentToken": "598e40b8-8a2b-4803-895f-eda079a7c356",
+	    
+	  // Additional fields needed from API requirements
+	  "monthlyPayment": 6077.27,
+	  "feesBalance": 0.00,
+	  "lateChargesBalance": 0.00,
+	  "paymentsOverdueCount": 0,
+	  "loanAddDate": null,
+	  "acquiredFrom": null,
+	  "investorRefiEligible": 0,
+	  "accountNumberLastFour": null,
+	  "routingNumber": null,
+	  "isPreferredAccount": true,
+	  "hasAutomaticPayments": false,
+	  "phonePaymentAllowed": true,
+	  "lastPaymentType": "Regular Payment",
+	  "lastPaymentStatus": "Posted",
+	  "lastPaymentConfirmationNumber": null,
+	  "borrowerBirthDate": null,
+	  "coBorrowerBirthDate": null,
+	  "lastEscrowStatementMailingDate": null
 }
 ```
 
@@ -776,27 +779,41 @@ Response:
 
 ```jsx
 POST /api/loans/{loanId}/payments
-Request:
 {
-  "paymentRequest": {
-    "paymentDate": "2025-03-10T00:00:00",
-    "paymentMethod": "bankAccount",
-    "accountType": "checking",
-    "accountNumber": "****8161",
-    "routingNumber": "021100361",
-    "paymentComponents": {
-      "principalAndInterest": 6077.27,
-      "additionalPrincipal": 500.00,
-      "additionalEscrow": 0.00,
-      "lateCharges": 0.00
-    },
-    "totalPaymentAmount": 6577.27,
-    "loanId": "0123456789",
-    "confirmationEmail": "john.doe@example.com",
-    "agentId": "KASTLE_AI_PAYMENT_AGENT"
-  }
+  "minimumMonthlyPaymentAmount": 6077.27,
+  "postDate": "2025-03-10",
+  "routingNumber": "021100361",
+  "accountNumber": "****8161",
+  "additionalEscrow": 0.00,
+  "additionalPrincipal": 500.00,
+  "lateFees": 0.00,
+  "nsfFees": 0.00,
+  "transactionFee": 0.00,
+  "otherFees": 0.00,
+  "amountBeingPaid": 6577.27,
+  "numberOfRegularMonthlyPayments": 1,
+  "expectedNumberOfRegularMonthlyPayments": 1,
+  "accountType": "checking",
+  "savePaymentAccount": true,
+  "makeDefaultPaymentAccount": true,
+  "paymentAllocationTypeCode": "MinimumPayment",
+  "bankName": "",
+  "paymentAccountId": 0,
+  "accountHolderId": 0,
+  "maximumNumberOfDaysToSchedulePayment": "",
+  "additionalFundsAmount": 0,
+  "verificationCode": "",
+  "loanNumber": "0674804091",
+  "smClientID": 0,
+  "paymentRequestSourceTypeCode": "Web",
+  
+  //Optional
+  "confirmationEmail": "dorian.garay@example.com",
+  "agentId": "KASTLE_AI_PAYMENT_AGENT"
 }
-Response:
+
+Response Format
+
 {
   "confirmationNumber": "string",
   "transactionDate": "date",
