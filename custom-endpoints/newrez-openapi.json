@@ -10,7 +10,7 @@
     },
     "servers": [
       {
-        "url": "https://api.kastle.ai"
+        "url": "https://kapi.prod1.kastle.ai"
       }
     ],
     "security": [

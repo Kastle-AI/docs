@@ -10,7 +10,7 @@
   },
   "servers": [
     {
-      "url": "https://api.kastle.ai"
+      "url": "https://kapi.prod1.kastle.ai"
     }
   ],
   "security": [
@@ -280,10 +280,6 @@
                     "content": "Hi, I'm calling about refinancing my loan."
                   }
                 ]
-              },
-              "customer_contact_id": {
-                "type": "string",
-                "description": "(Optional) The unique identifier for this call as maintained in the customer's system"
               }
             }
           }
