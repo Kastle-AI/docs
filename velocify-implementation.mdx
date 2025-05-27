@@ -11,7 +11,7 @@ In Lead Manager, open the Menu, then under Administration find the option named 
 Fill out the following fields:
 
 - Title - This can be anything, (eg: "Leads to Kastle")
-- URL - Webhook URL provided by Kastle. For Angel Oak, this is `https://api.kastle.ai/leads/velocify/receive/angel-oak`
+- URL - Webhook URL provided by Kastle. This will be in the format `https://api.kastle.ai/leads/velocify/receive/<your-organization>`
 - Type - Must be JSON POST
 - Header - This needs to have an Authorization header with the value `Bearer <your-api-key>`. This is as provided in [Introduction](/api-reference/introduction)
 - Success Regex - Not used by Kastle
@@ -68,4 +68,4 @@ StatusIds or ActionIds as defined on Velocify.
 | BAD_PHONE_NUMBER | Invalid or unreachable phone number |
 | NOT_CONTACTED | No contact after five attempts |
 
-You will need to provide the corresponding Velocify StatusIds to receive automatic updates to leads.
+You will need to provide the corresponding Velocify StatusIds to receive automatic updates to leads. 
