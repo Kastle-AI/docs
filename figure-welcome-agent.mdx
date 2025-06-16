@@ -33,7 +33,8 @@ These endpoints use a pre-configured test campaign and are ideal for development
   "payment_due": "number",
   "payment_due_date": "YYYY-MM-DD",
   "loan_number_servicer": "string",
-  "originating_org": "string"
+  "originating_org": "string",
+  "loan_short_id": "string"
 }
 ```
 
@@ -48,6 +49,7 @@ These endpoints use a pre-configured test campaign and are ideal for development
 - **payment_due_date**: Must be in YYYY-MM-DD format and in the future
 - **loan_number_servicer**: Unique identifier for the loan (used as entity ID)
 - **originating_org**: Name of the originating organization
+- **loan_short_id**: Short identifier for the loan
 
 #### Success Response
 
@@ -65,7 +67,8 @@ These endpoints use a pre-configured test campaign and are ideal for development
     "loan_number_servicer": "string",
     "originating_org": "string",
     "payment_amount_due": "$amount",
-    "payment_due_date": "YYYY-MM-DD"
+    "payment_due_date": "YYYY-MM-DD",
+    "loan_short_id": "string"
   }
 }
 ```
@@ -91,7 +94,8 @@ These endpoints use a pre-configured test campaign and are ideal for development
   "loan_number_servicer": "string",
   "originating_org": "string",
   "payment_amount_due": "$amount",
-  "payment_due_date": "YYYY-MM-DD"
+  "payment_due_date": "YYYY-MM-DD",
+  "loan_short_id": "string"
 }
 ```
 
@@ -114,7 +118,8 @@ These endpoints use a pre-configured test campaign and are ideal for development
   "payment_due": "number",
   "payment_due_date": "YYYY-MM-DD",
   "loan_number_servicer": "string",
-  "originating_org": "string"
+  "originating_org": "string",
+  "loan_short_id": "string"
 }
 ```
 
@@ -172,7 +177,8 @@ These endpoints use a pre-configured test campaign and are ideal for development
       "loan_number_servicer": "string",
       "originating_org": "string",
       "payment_amount_due": "$amount",
-      "payment_due_date": "YYYY-MM-DD"
+      "payment_due_date": "YYYY-MM-DD",
+      "loan_short_id": "string"
     }
   ],
   "next_token": "string"
@@ -259,7 +265,8 @@ These endpoints are for production use. All endpoints require JWT authentication
   "payment_due": "number",
   "payment_due_date": "YYYY-MM-DD",
   "loan_number_servicer": "string",
-  "originating_org": "string"
+  "originating_org": "string",
+  "loan_short_id": "string"
 }
 ```
 
@@ -279,7 +286,8 @@ These endpoints are for production use. All endpoints require JWT authentication
     "loan_number_servicer": "string",
     "originating_org": "string",
     "payment_amount_due": "$amount",
-    "payment_due_date": "YYYY-MM-DD"
+    "payment_due_date": "YYYY-MM-DD",
+    "loan_short_id": "string"
   }
 }
 ```
@@ -305,7 +313,8 @@ These endpoints are for production use. All endpoints require JWT authentication
   "loan_number_servicer": "string",
   "originating_org": "string",
   "payment_amount_due": "$amount",
-  "payment_due_date": "YYYY-MM-DD"
+  "payment_due_date": "YYYY-MM-DD",
+  "loan_short_id": "string"
 }
 ```
 
@@ -329,7 +338,8 @@ All fields are optional. Only provide the fields you want to update.
   "payment_due": "number",
   "payment_due_date": "YYYY-MM-DD",
   "loan_number_servicer": "string",
-  "originating_org": "string"
+  "originating_org": "string",
+  "loan_short_id": "string"
 }
 ```
 
@@ -385,7 +395,8 @@ All fields are optional. Only provide the fields you want to update.
       "loan_number_servicer": "string",
       "originating_org": "string",
       "payment_amount_due": "$amount",
-      "payment_due_date": "YYYY-MM-DD"
+      "payment_due_date": "YYYY-MM-DD",
+      "loan_short_id": "string"
     }
   ],
   "next_token": "string"
