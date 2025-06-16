@@ -2,79 +2,430 @@
 
 ## Overview
 
-This documentation outlines the API integration for Kastle AI's welcome call agent. The system processes leads and makes automated outbound calls to borrowers based on the data you provide.
+This documentation outlines the API integration for Kastle AI's welcome call agent. The system processes borrower entities and makes automated outbound calls based on the data you provide.
 
-## Entity Management APIs
+There are two types of APIs available:
+- **Test API Endpoints**: For testing and development with a pre-configured campaign
+- **Production Entity Management APIs**: For production campaigns with your own campaign IDs
 
-All endpoints use the base URL: `https://kapi.prod1.kastle.ai/api/v1/campaigns/entities`
+## Test API Endpoints
+
+These endpoints use a pre-configured test campaign and are ideal for development and testing.
 
 ### Create Entity
 
-**Endpoint:** `/create/figure-lending/{campaign_id}`  
+**Endpoint:** `/figure-lending/welcome-call/test/create`  
 **Method:** `POST`  
 **Content-Type:** `application/json`
+**Authentication:** JWT token required
 
-> Note: The `campaign_id` can be accessed on the campaign details page after you create a campaign to launch with
+> Note: This is a test endpoint for Figure Lending welcome call integration. JWT authentication is required with valid Figure Lending organization credentials.
 
 #### Request Body
 
 ```json
 {
-  "autopay_status": "string",
-  "expected_dob": "YYYY-MM-DD",
-  "expected_first_name": "string",
-  "expected_full_name": "string", 
-  "expected_last_name": "string",
-  "expected_property_address": "string",
-  "payment_due": "string",
-  "payment_due_date": "YYYY-MM-DD",
   "phone_number": "string",
-  "originating_org": "string",
-  "loan_number_servicer": "string"
+  "expected_full_name": "string",
+  "expected_dob": "YYYY-MM-DD",
+  "expected_property_address": "string",
+  "autopay_status": "Y|N",
+  "payment_due": "number",
+  "payment_due_date": "YYYY-MM-DD",
+  "loan_number_servicer": "string",
+  "originating_org": "string"
 }
 ```
 
-#### Response
+#### Field Validation Rules
+
+- **phone_number**: Must be in valid US, CA, or PR format
+- **expected_full_name**: Full name of the borrower
+- **expected_dob**: Date of birth in YYYY-MM-DD format
+- **expected_property_address**: Property address (will be normalized and expanded)
+- **autopay_status**: Must be either "Y" or "N"
+- **payment_due**: Valid numeric amount (will be formatted with $ prefix)
+- **payment_due_date**: Must be in YYYY-MM-DD format and in the future
+- **loan_number_servicer**: Unique identifier for the loan (used as entity ID)
+- **originating_org**: Name of the originating organization
+
+#### Success Response
+
+```json
+{
+  "message": "Campaign entity created successfully",
+  "entity_id": "string",
+  "data": {
+    "id": "string",
+    "phone_number": "string",
+    "autopay_status": "Y|N",
+    "borrower_full_name": "string",
+    "expected_dob": "YYYY-MM-DD",
+    "property_address": "string",
+    "loan_number_servicer": "string",
+    "originating_org": "string",
+    "payment_amount_due": "$amount",
+    "payment_due_date": "YYYY-MM-DD"
+  }
+}
+```
+
+### Get Entity
+
+**Endpoint:** `/figure-lending/welcome-call/test/get/<entity_id>`  
+**Method:** `GET`  
+**Authentication:** JWT token required
+
+#### Success Response
 
 ```json
 {
   "entity_id": "string",
-  "status": "created"
+  "created_at": "timestamp",
+  "id": "string",
+  "phone_number": "string",
+  "autopay_status": "Y|N",
+  "borrower_full_name": "string",
+  "expected_dob": "YYYY-MM-DD",
+  "property_address": "string",
+  "loan_number_servicer": "string",
+  "originating_org": "string",
+  "payment_amount_due": "$amount",
+  "payment_due_date": "YYYY-MM-DD"
 }
 ```
 
-### Other Entity Endpoints
+### Update Entity
 
-The following additional endpoints are available for entity management:
+**Endpoint:** `/figure-lending/welcome-call/test/update/<entity_id>`  
+**Method:** `PUT`  
+**Content-Type:** `application/json`
+**Authentication:** JWT token required
 
-- **Get Entity**: `GET /get/figure-lending/{campaign_id}/{entity_id}`
-- **Update Entity**: `PUT /update/figure-lending/{campaign_id}/{entity_id}`
-- **Delete Entity**: `DELETE /delete/figure-lending/{campaign_id}/{entity_id}`
-- **List Entities**: `GET /list/figure-lending/{campaign_id}`
+#### Request Body
+
+```json
+{
+  "phone_number": "string",
+  "expected_full_name": "string",
+  "expected_dob": "YYYY-MM-DD",
+  "expected_property_address": "string",
+  "autopay_status": "Y|N",
+  "payment_due": "number",
+  "payment_due_date": "YYYY-MM-DD",
+  "loan_number_servicer": "string",
+  "originating_org": "string"
+}
+```
+
+> Note: All fields are optional for updates. Only provide the fields you want to update.
+
+#### Success Response
+
+```json
+{
+  "message": "Campaign entity updated successfully",
+  "entity_id": "string"
+}
+```
+
+### Delete Entity
+
+**Endpoint:** `/figure-lending/welcome-call/test/delete/<entity_id>`  
+**Method:** `DELETE`  
+**Authentication:** JWT token required
+
+#### Success Response
+
+```json
+{
+  "message": "Campaign entity deleted successfully",
+  "entity_id": "string"
+}
+```
+
+### List Entities
+
+**Endpoint:** `/figure-lending/welcome-call/test/list`  
+**Method:** `GET`  
+**Authentication:** JWT token required
+
+#### Query Parameters
+
+- **next_token** (optional): Token for pagination
+- **limit** (optional): Maximum number of entities to return
+
+#### Success Response
+
+```json
+{
+  "entities": [
+    {
+      "entity_id": "string",
+      "created_at": "timestamp",
+      "id": "string",
+      "phone_number": "string",
+      "autopay_status": "Y|N",
+      "borrower_full_name": "string",
+      "expected_dob": "YYYY-MM-DD",
+      "property_address": "string",
+      "loan_number_servicer": "string",
+      "originating_org": "string",
+      "payment_amount_due": "$amount",
+      "payment_due_date": "YYYY-MM-DD"
+    }
+  ],
+  "next_token": "string"
+}
+```
+
+## Error Responses
+
+These error responses apply to all test API endpoints above.
+
+**400 Bad Request - Validation Errors:**
+```json
+{
+  "error": "Validation failed",
+  "missing_fields": ["field1", "field2"],
+  "validation_errors": ["error1", "error2"]
+}
+```
+
+**400 Bad Request - Duplicate Entity:**
+```json
+{
+  "error": "The loan number servicer already exists in campaign"
+}
+```
+
+**400 Bad Request - Campaign Status:**
+```json
+{
+  "error": "Campaign is not in draft status"
+}
+```
+
+**401 Unauthorized:**
+```json
+{
+  "error": "Unauthorized"
+}
+```
+
+**404 Not Found - Campaign:**
+```json
+{
+  "error": "Campaign not found"
+}
+```
+
+**404 Not Found - Entity:**
+```json
+{
+  "error": "Outbound campaign entity not found"
+}
+```
+
+**500 Internal Server Error:**
+```json
+{
+  "error": "Failed to create campaign entity"
+}
+```
+
+## Production Entity Management APIs
+
+These endpoints are for production use. All endpoints require JWT authentication.
+
+> Note: Contact Kastle AI support to get your production campaign ID and API access.
+
+### Create Entity
+
+**Endpoint:** `/figure-lending/welcome-call/prod/create`
+**Method:** `POST`
+**Content-Type:** `application/json`
+**Authentication:** JWT token required
+
+#### Request Body
+
+```json
+{
+  "phone_number": "string",
+  "expected_full_name": "string",
+  "expected_dob": "YYYY-MM-DD",
+  "expected_property_address": "string",
+  "autopay_status": "Y|N",
+  "payment_due": "number",
+  "payment_due_date": "YYYY-MM-DD",
+  "loan_number_servicer": "string",
+  "originating_org": "string"
+}
+```
+
+#### Success Response
+
+```json
+{
+  "message": "Campaign entity created successfully",
+  "entity_id": "string",
+  "data": {
+    "id": "string",
+    "phone_number": "string",
+    "autopay_status": "Y|N",
+    "borrower_full_name": "string",
+    "expected_dob": "YYYY-MM-DD",
+    "property_address": "string",
+    "loan_number_servicer": "string",
+    "originating_org": "string",
+    "payment_amount_due": "$amount",
+    "payment_due_date": "YYYY-MM-DD"
+  }
+}
+```
+
+### Get Entity
+
+**Endpoint:** `/figure-lending/welcome-call/prod/get/<entity_id>`
+**Method:** `GET`
+**Authentication:** JWT token required
+
+#### Success Response
+
+```json
+{
+  "entity_id": "string",
+  "created_at": "timestamp",
+  "id": "string",
+  "phone_number": "string",
+  "autopay_status": "Y|N",
+  "borrower_full_name": "string",
+  "expected_dob": "YYYY-MM-DD",
+  "property_address": "string",
+  "loan_number_servicer": "string",
+  "originating_org": "string",
+  "payment_amount_due": "$amount",
+  "payment_due_date": "YYYY-MM-DD"
+}
+```
+
+### Update Entity
+
+**Endpoint:** `/figure-lending/welcome-call/prod/update/<entity_id>`
+**Method:** `PUT`
+**Content-Type:** `application/json`
+**Authentication:** JWT token required
+
+#### Request Body
+All fields are optional. Only provide the fields you want to update.
+
+```json
+{
+  "phone_number": "string",
+  "expected_full_name": "string",
+  "expected_dob": "YYYY-MM-DD",
+  "expected_property_address": "string",
+  "autopay_status": "Y|N",
+  "payment_due": "number",
+  "payment_due_date": "YYYY-MM-DD",
+  "loan_number_servicer": "string",
+  "originating_org": "string"
+}
+```
+
+#### Success Response
+
+```json
+{
+  "message": "Campaign entity updated successfully",
+  "entity_id": "string"
+}
+```
+
+### Delete Entity
+
+**Endpoint:** `/figure-lending/welcome-call/prod/delete/<entity_id>`
+**Method:** `DELETE`
+**Authentication:** JWT token required
+
+#### Success Response
+
+```json
+{
+  "message": "Campaign entity deleted successfully",
+  "entity_id": "string"
+}
+```
+
+### List Entities
+
+**Endpoint:** `/figure-lending/welcome-call/prod/list`
+**Method:** `GET`
+**Authentication:** JWT token required
+
+#### Query Parameters
+
+- **next_token** (optional): Token for pagination
+- **limit** (optional): Maximum number of entities to return
+
+#### Success Response
+
+```json
+{
+  "entities": [
+    {
+      "entity_id": "string",
+      "created_at": "timestamp",
+      "id": "string",
+      "phone_number": "string",
+      "autopay_status": "Y|N",
+      "borrower_full_name": "string",
+      "expected_dob": "YYYY-MM-DD",
+      "property_address": "string",
+      "loan_number_servicer": "string",
+      "originating_org": "string",
+      "payment_amount_due": "$amount",
+      "payment_due_date": "YYYY-MM-DD"
+    }
+  ],
+  "next_token": "string"
+}
+```
 
 ## Callback Configuration
 
-You need to provide a callback endpoint to receive call results from Kastle AI.
+Configure a webhook endpoint to receive call results and conversation summaries from Kastle AI after each outbound call is completed.
 
-#### Request Body (Sent by Kastle AI)
+### Webhook Request Format
+
+When a call is completed, Kastle AI will send a POST request to your configured webhook endpoint:
 
 ```json
 {
   "Note_Type": "Call",
   "Call_Type": "Outgoing",
   "Reason": "Other",
-  "Loan": "Loan UUID",
-  "Disposition": "Voicemail",
+  "Loan": "loan_number_servicer",
+  "Disposition": "Voicemail|Connected|No Answer|Busy",
   "Note": "Call summary text with conversation details",
   "Timestamp": "YYYY-MM-DD HH:MM:SS",
   "Duration": "MM:SS"
 }
 ```
 
-#### Data Dump Option
+### Data Export Alternative
 
-Alternatively, Kastle AI can provide a data dump of all call records if needed. This can be delivered via secure file transfer or API endpoint. Please specify your preferred delivery method when setting up the integration.
+If webhook integration is not suitable, Kastle AI can provide periodic data exports of all call records via:
+- Secure file transfer (SFTP/S3)
+- Scheduled API dumps
+- Custom data delivery methods
 
-## Support
+Please specify your preferred delivery method when setting up the integration.
 
-For questions or issues with API integration, please send us a message on https://join.slack.com/share/enQtODgxNTg1ODUyOTc3OC1iN2NhMmY3MzA4MDFmNzg1MjNjNWE1MGQ0ODI2MGM1ODM3YWRmYWI5YTY2NmNjOTdkMWZhYjllNjdmMmRkNjIz 
+## Support and Integration
+
+For questions, issues, or to set up your production integration:
+
+- **Technical Support**: Send us a message on our Slack channel: https://join.slack.com/share/enQtODgxNTg1ODUyOTc3OC1iN2NhMmY3MzA4MDFmNzg1MjNjNWE1MGQ0ODI2MGM1ODM3YWRmYWI5YTY2NmNjOTdkMWZhYjllNjdmMmRkNjIz
+- **Production Setup**: Contact us to configure your production campaign ID and webhook endpoints
+- **API Testing**: Use the test endpoints above to validate your integration before going live 
