@@ -1,0 +1,208 @@
+# Kastle ⇄ Microsoft Bookings Integration
+
+> **Purpose**  
+> Seamlessly sync your Microsoft Bookings calendars with Kastle's voice‑agent platform so Kastle agents can schedule appointments for your team
+
+---
+
+## Table of Contents
+
+1. [Overview](#overview)
+2. [Prerequisites](#prerequisites)
+3. [Step 1 – Create a Shared Bookings Page](#step-1--create-a-shared-bookings-page)
+4. [Step 2 – Register an Azure AD (Entra ID) App](#step-2--register-an-azure-ad-entra-id-app)
+5. [Step 3 – Provide Credentials to Kastle](#step-3--provide-credentials-to-kastle)
+6. [Step 4 – Connect Kastle to Microsoft Bookings](#step-4--connect-kastle-to-microsoft-bookings)
+7. [Security Best Practices](#security-best-practices)
+8. [Troubleshooting](#troubleshooting)
+9. [FAQ](#faq)
+10. [Support](#support)
+
+---
+
+## Overview
+
+The Kastle Microsoft Bookings integration enables seamless appointment scheduling through voice interactions. Here's how the data flows:
+
+```
+Borrower → Kastle Voice Agent → Kastle Booking Service → Microsoft Graph → Microsoft Bookings ↔ Staff Outlook Calendars
+```
+
+### Integration Components
+
+1. A **shared Microsoft Bookings page** aggregates the calendars of all participating staff (e.g., loan officers)
+2. A confidential‑client **Azure AD application** grants Kastle application‑level access to Microsoft Graph
+3. Kastle's **Bookings connector** reads free/busy information and writes new appointments, ensuring one source of truth
+
+---
+
+## Prerequisites
+
+| Requirement | Description |
+|-------------|-------------|
+| **Microsoft 365 subscription** | The tenant must include Microsoft Bookings |
+| **Admin rights** | Global or Bookings admin to create pages; Entra ID admin to register apps & grant consent |
+| **Kastle account** | Bookings connector enabled (contact support if not visible) |
+| **Internet access** | Outbound HTTPS (443) to `graph.microsoft.com` |
+| **Time‑zone alignment** | Ensure tenant time‑zone matches business hours to avoid slot drift |
+
+---
+
+## Step 1 – Create a Shared Bookings Page
+
+Follow these steps to set up your Microsoft Bookings page:
+
+| # | Action |
+|---|--------|
+| 1 | Sign in to **Microsoft 365** and open **Bookings** (`https://outlook.office.com/bookings/`) |
+| 2 | In the left nav, select **Shared Bookings ▸ Create booking page ▸ Create from scratch** |
+| 3 | Fill out **Business information** (name, logo, address, phone, time‑zone) |
+| 4 | Add each staff member: **Staff ▸ Add new staff ▸ Search user ▸ Role = Staff ▸ Save** |
+| 5 | Configure **Booking page settings** → service hours, buffer time, lead time, and Teams/Zoom toggle (if virtual meetings) |
+| 6 | Click **Publish booking page** to generate the internal link (keep for future reference) |
+
+<Note>
+💡 **Tip:** If the **Bookings** option is missing in the M365 admin center, enable it under **Settings ▸ Org settings ▸ Bookings**.
+</Note>
+
+---
+
+## Step 2 – Register an Azure AD (Entra ID) App
+
+### Create the Application
+
+1. Sign in to the **Azure portal** (`https://portal.azure.com`) 
+2. Navigate to **Microsoft Entra ID** → **App registrations** → **+ New registration**
+3. Name the app **`Kastle-Bookings-Connector`** and choose **Accounts in this organizational directory only**
+
+### Collect Application Information
+
+After creation, note the following values from the *Overview* blade:
+
+| Field | Copy From |
+|-------|-----------|
+| **Client ID** | *Overview* blade |
+| **Tenant ID** | *Overview* blade |
+
+### Create Client Secret
+
+1. Navigate to **Certificates & secrets ▸ Client secrets ▸ + New client secret**
+2. Enter a description and expiry (12 months recommended)
+3. Click **Add**, then copy the **Secret Value** immediately (it is hidden once you leave the blade)
+
+<Warning>
+⚠️ **Important:** Copy the secret value immediately as it cannot be retrieved later.
+</Warning>
+
+### Configure API Permissions
+
+1. Go to **API permissions ▸ Add a permission ▸ Microsoft Graph ▸ Application permissions**
+2. Add the following permissions:
+   - `Bookings.ReadWrite.All`
+   - `BookingsAppointment.ReadWrite.All`
+3. Click **Grant admin consent** for the tenant
+
+---
+
+## Step 3 – Provide Credentials to Kastle
+
+Send the following credentials **securely** to your Kastle administrator:
+
+| Variable | Description |
+|----------|-------------|
+| `MSBOOKINGS_CLIENT_ID` | Application (client) ID |
+| `MSBOOKINGS_TENANT_ID` | Directory (tenant) ID |
+| `MSBOOKINGS_CLIENT_SECRET` | Client secret **value** |
+
+<Warning>
+🔒 **Security Note:** These credentials provide access to your booking data. Use secure channels (encrypted email, secure file sharing) to transmit them.
+</Warning>
+
+---
+
+## Step 4 – Connect Kastle to Microsoft Bookings
+
+Once you've provided the credentials to Kastle:
+
+1. Your Kastle administrator will configure the integration in the Kastle platform
+2. Test the connection by having a Kastle agent attempt to schedule a test appointment
+3. Verify that the appointment appears in your Microsoft Bookings calendar
+4. Confirm that staff members receive appropriate notifications
+
+---
+
+## Security Best Practices
+
+### Application Security
+- **Rotate secrets regularly** (every 12 months minimum)
+- **Use least-privilege permissions** (only grant necessary Graph API permissions)
+- **Monitor application usage** through Azure AD audit logs
+
+### Bookings Security
+- **Limit staff access** to only authorized personnel
+- **Review booking permissions** regularly
+- **Enable notification settings** for appointment changes
+
+### Network Security
+- **Whitelist outbound traffic** to `graph.microsoft.com` (port 443)
+- **Monitor API calls** for unusual activity patterns
+
+---
+
+## Troubleshooting
+
+### Common Issues
+
+| Issue | Symptoms | Solution |
+|-------|----------|----------|
+| **Authentication failures** | "Invalid client credentials" errors | Verify Client ID, Tenant ID, and Secret are correct |
+| **Permission denied** | "Insufficient privileges" errors | Ensure admin consent was granted for API permissions |
+| **Time zone mismatches** | Appointments appear at wrong times | Verify Bookings page time zone matches business location |
+| **Staff not appearing** | Available slots don't reflect staff calendars | Check that staff members are properly added to the Bookings page |
+
+### Diagnostic Steps
+
+1. **Verify credentials** in Azure portal
+2. **Check API permissions** and admin consent status
+3. **Test Graph API access** using Microsoft Graph Explorer
+4. **Review Kastle integration logs** with your administrator
+
+---
+
+## FAQ
+
+**Q: Does Bookings support multiple shared pages?**  
+A: Yes. You can create and manage multiple booking pages within one tenant and switch between them at any time.
+
+**Q: Is Bookings available in hybrid environments?**  
+A: No. Bookings is cloud‑only and requires cloud‑hosted mailboxes.
+
+**Q: Can we restrict booking slots to business hours only?**  
+A: Yes. Use the **Booking page settings** to define service hours and buffer times per service.
+
+**Q: What happens if a staff member is double-booked?**  
+A: The integration checks availability in real-time. If a conflict is detected, the Kastle agent will offer alternative time slots.
+
+**Q: Can customers reschedule or cancel appointments through Kastle?**  
+A: Yes, Kastle agents can modify or cancel existing appointments through the Microsoft Graph API integration.
+
+**Q: How long does it take for changes to sync?**  
+A: Changes are typically reflected within 1-2 minutes, depending on Microsoft Graph API response times.
+
+---
+
+## Support
+
+### Kastle Support
+For issues with the Kastle platform or integration configuration:
+- **Email:** support@kastle.ai
+- **Documentation:** [Kastle Documentation Portal](https://docs.kastle.ai)
+
+### Microsoft Support
+For issues with Microsoft Bookings or Azure AD:
+- **Microsoft 365 Admin Center:** Service health and support requests
+- **Azure Support:** For Azure AD application issues
+- **Microsoft Documentation:** [Microsoft Bookings documentation](https://docs.microsoft.com/en-us/microsoft-365/bookings/)
+
+### Emergency Contacts
+For urgent integration issues affecting live operations, contact your designated Kastle account manager or use the priority support channels provided during onboarding.
