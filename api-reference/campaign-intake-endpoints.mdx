@@ -1,0 +1,358 @@
+# Campaign Intake API
+
+The Campaign Intake API allows external systems to manage entities within Kastle campaigns. These endpoints provide full CRUD operations for campaign entities with real-time processing capabilities.
+
+## Authentication
+
+All endpoints require JWT authentication. Include your JWT token in the Authorization header:
+
+```json
+{"Authorization": "Bearer {jwt_token}"}
+```
+
+## Base URL
+
+All endpoints use the base path: `/api/v1/campaigns/entities/`
+
+---
+
+## List Campaign Entities
+
+Retrieve all entities for a specific campaign with pagination support.
+
+### Endpoint
+```
+GET /api/v1/campaigns/entities/list/{org_name}/{campaign_id}
+```
+
+### Path Parameters
+- `org_name` (string, required) - Organization identifier
+- `campaign_id` (string, required) - Campaign identifier
+
+### Query Parameters
+- `next_token` (string, optional) - Pagination token for retrieving next page
+- `limit` (integer, optional) - Maximum number of entities to return (default: 100)
+
+### Response
+```json
+{
+  "entities": [
+    {
+      "id": "entity_123",
+      "data": {
+        "firstName": "John",
+        "lastName": "Doe",
+        "email": "john.doe@example.com"
+      },
+      "status": "active",
+      "created_at": "2024-01-15T10:30:00Z"
+    }
+  ],
+  "next_token": "token_abc123"
+}
+```
+
+### Error Responses
+- `401 Unauthorized` - Invalid JWT or insufficient permissions
+- `404 Not Found` - Campaign or organization not found
+
+---
+
+## Create Campaign Entity
+
+Add a new entity to an active campaign with real-time processing.
+
+### Endpoint
+```
+POST /api/v1/campaigns/entities/create/{org_name}/{campaign_id}
+```
+
+### Path Parameters
+- `org_name` (string, required) - Organization identifier
+- `campaign_id` (string, required) - Campaign identifier
+
+### Request Body
+```json
+{
+  "firstName": "Jane",
+  "lastName": "Smith",
+  "email": "jane.smith@example.com",
+  "phone": "+1234567890",
+  "customFields": {
+    "leadSource": "website",
+    "priority": "high"
+  }
+}
+```
+
+### Response
+```json
+{
+  "id": "entity_456",
+  "data": {
+    "firstName": "Jane",
+    "lastName": "Smith",
+    "email": "jane.smith@example.com",
+    "phone": "+1234567890",
+    "customFields": {
+      "leadSource": "website",
+      "priority": "high"
+    }
+  },
+  "status": "created",
+  "created_at": "2024-01-15T10:35:00Z"
+}
+```
+
+### Error Responses
+- `400 Bad Request` - Invalid entity data
+- `401 Unauthorized` - Invalid JWT or insufficient permissions
+- `404 Not Found` - Campaign or organization not found
+
+---
+
+## Create Multiple Campaign Entities
+
+Add multiple new entities to an active campaign in a single request with batch processing.
+
+### Endpoint
+```
+POST /api/v1/campaigns/entities/create-multiple/{org_name}/{campaign_id}
+```
+
+### Path Parameters
+- `org_name` (string, required) - Organization identifier
+- `campaign_id` (string, required) - Campaign identifier
+
+### Request Body
+```json
+{
+  "entities": [
+    {
+      "firstName": "John",
+      "lastName": "Doe",
+      "email": "john.doe@example.com",
+      "phone": "+1234567890"
+    },
+    {
+      "firstName": "Jane",
+      "lastName": "Smith",
+      "email": "jane.smith@example.com",
+      "phone": "+0987654321"
+    }
+  ]
+}
+```
+
+### Response
+```json
+{
+  "results": [
+    {
+      "index": 0,
+      "success": true,
+      "entity": {
+        "id": "entity_789",
+        "data": {
+          "firstName": "John",
+          "lastName": "Doe",
+          "email": "john.doe@example.com",
+          "phone": "+1234567890"
+        },
+        "status": "created"
+      },
+      "status_code": 200
+    },
+    {
+      "index": 1,
+      "success": false,
+      "error": "Invalid email format",
+      "status_code": 400
+    }
+  ],
+  "summary": {
+    "total": 2,
+    "success_count": 1,
+    "failure_count": 1
+  }
+}
+```
+
+### Status Codes
+- `200 OK` - All entities created successfully
+- `207 Multi-Status` - Partial success (some entities failed)
+- `400 Bad Request` - All entities failed or invalid request format
+- `401 Unauthorized` - Invalid JWT or insufficient permissions
+
+### Error Responses
+- `400 Bad Request` - Request must contain 'entities' list or entities must be a non-empty list
+- `401 Unauthorized` - Invalid JWT or insufficient permissions
+- `404 Not Found` - Campaign or organization not found
+
+---
+
+## Get Campaign Entity
+
+Retrieve specific entity details and status.
+
+### Endpoint
+```
+GET /api/v1/campaigns/entities/get/{org_name}/{campaign_id}/{entity_id}
+```
+
+### Path Parameters
+- `org_name` (string, required) - Organization identifier
+- `campaign_id` (string, required) - Campaign identifier
+- `entity_id` (string, required) - Entity identifier
+
+### Response
+```json
+{
+  "id": "entity_123",
+  "data": {
+    "firstName": "John",
+    "lastName": "Doe",
+    "email": "john.doe@example.com",
+    "phone": "+1234567890"
+  },
+  "status": "active",
+  "created_at": "2024-01-15T10:30:00Z",
+  "updated_at": "2024-01-15T11:45:00Z"
+}
+```
+
+### Error Responses
+- `401 Unauthorized` - Invalid JWT or insufficient permissions
+- `404 Not Found` - Entity, campaign, or organization not found
+
+---
+
+## Update Campaign Entity
+
+Modify entity data and trigger variable updates.
+
+### Endpoint
+```
+PUT /api/v1/campaigns/entities/update/{org_name}/{campaign_id}/{entity_id}
+```
+
+### Path Parameters
+- `org_name` (string, required) - Organization identifier
+- `campaign_id` (string, required) - Campaign identifier
+- `entity_id` (string, required) - Entity identifier
+
+### Request Body
+```json
+{
+  "firstName": "John",
+  "lastName": "Doe Updated",
+  "email": "john.doe.updated@example.com",
+  "customFields": {
+    "priority": "medium",
+    "notes": "Updated contact information"
+  }
+}
+```
+
+### Response
+```json
+{
+  "id": "entity_123",
+  "data": {
+    "firstName": "John",
+    "lastName": "Doe Updated",
+    "email": "john.doe.updated@example.com",
+    "phone": "+1234567890",
+    "customFields": {
+      "priority": "medium",
+      "notes": "Updated contact information"
+    }
+  },
+  "status": "updated",
+  "updated_at": "2024-01-15T12:00:00Z"
+}
+```
+
+### Error Responses
+- `400 Bad Request` - Invalid entity data
+- `401 Unauthorized` - Invalid JWT or insufficient permissions
+- `404 Not Found` - Entity, campaign, or organization not found
+
+---
+
+## Delete Campaign Entity
+
+Remove entity from campaign and stop associated workflows.
+
+### Endpoint
+```
+DELETE /api/v1/campaigns/entities/delete/{org_name}/{campaign_id}/{entity_id}/{received_at}
+```
+
+### Path Parameters
+- `org_name` (string, required) - Organization identifier
+- `campaign_id` (string, required) - Campaign identifier
+- `entity_id` (string, required) - Entity identifier
+- `received_at` (integer, required) - Timestamp when entity was received
+
+### Response
+```json
+{
+  "id": "entity_123",
+  "status": "deleted",
+  "deleted_at": "2024-01-15T12:30:00Z",
+  "message": "Entity successfully removed from campaign"
+}
+```
+
+### Error Responses
+- `401 Unauthorized` - Invalid JWT or insufficient permissions
+- `404 Not Found` - Entity, campaign, or organization not found
+
+---
+
+## Common Error Responses
+
+All endpoints may return the following errors:
+
+### 401 Unauthorized
+```json
+{
+  "error": "Unauthorized"
+}
+```
+
+Occurs when:
+- Invalid or missing JWT token
+- JWT user ID doesn't match organization
+- Organization doesn't own the campaign
+
+### 404 Not Found
+```json
+{
+  "error": "Campaign not found"
+}
+```
+
+### 500 Internal Server Error
+```json
+{
+  "error": "Internal server error"
+}
+```
+
+---
+
+## Integration Notes
+
+1. **Real-time Processing**: Entity creation and updates trigger immediate processing in the campaign workflow.
+
+2. **Batch Operations**: Use the create-multiple endpoint for bulk entity imports to improve performance.
+
+3. **Pagination**: The list endpoint supports pagination through the `next_token` parameter.
+
+4. **Authorization**: All endpoints validate that the JWT user owns both the organization and campaign.
+
+5. **Data Validation**: Entity data is validated according to campaign-specific rules before processing.
+
+6. **Workflow Impact**: Creating, updating, or deleting entities may affect active campaign workflows and automations. 
