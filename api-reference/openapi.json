@@ -145,6 +145,70 @@
           }
         }
       }
+    },
+    "/api/v1/calls/generate_recording_url/{call_id}": {
+      "get": {
+        "description": "Generates a presigned URL for accessing the recording of a specific call",
+        "parameters": [
+          {
+            "name": "call_id",
+            "in": "path",
+            "description": "Unique identifier of the call to generate recording URL for",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successfully generated recording URL",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "recording_url": {
+                      "type": "string",
+                      "description": "Presigned URL for accessing the call recording"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized - User does not have access to this call",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Call not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error - Failed to generate recording URL",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {
