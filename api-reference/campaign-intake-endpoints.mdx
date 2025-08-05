@@ -1,6 +1,23 @@
-# Campaign Intake API
 
 The Campaign Intake API allows external systems to manage entities within Kastle campaigns. These endpoints provide full CRUD operations for campaign entities with real-time processing capabilities.
+
+***These endpoints are customizable on a per-agent basis, please contact us if you would like to adjust the schema to add, remove, or modify fields.***
+
+*All of these schema's are examples. For each agent, the schema will be different depending on the required functionality.*
+
+
+## Entities
+
+Entities are the core objects that are used to send and receive data from the campaign API. Entities will follow the same schema across all endpoints, however, they are configurable on a per-agent basis.
+
+### Example Entity Schema
+```json
+{
+  "firstName": "John",
+  "lastName": "Doe",
+  "phoneNumber": "+15555555555",
+}
+```
 
 ## Authentication
 
