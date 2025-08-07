@@ -387,194 +387,6 @@ DELETE /api/v1/campaigns/entities/delete/{org_name}/{campaign_id}/{entity_id}/{r
 
 ---
 
-## Relcu Integration Endpoints
-
-The Relcu Integration API provides endpoints for managing Relcu integrations and handling lead data from Relcu systems. These endpoints allow you to create, manage, and interact with Relcu integrations within Kastle campaigns.
-
-### Authentication
-
-All Relcu integration endpoints require JWT authentication. Include your JWT token in the Authorization header:
-
-```json
-{"Authorization": "Bearer {jwt_token}"}
-```
-
-### Authorization Requirements
-
-- **Integration Management Endpoints**: Require `kastle-admin` organization access
-- **Lead Management Endpoints**: Require access to Relcu-integrated organizations (`relcu`, `cardinal-financial`)
-
----
-
-## Integration Management
-
-### Create Relcu Integration
-
-Create a new Relcu integration for a journey configuration.
-
-#### Endpoint
-```
-POST /relcu/integrations
-```
-
-#### Authorization
-Requires `kastle-admin` organization access.
-
-#### Request Body
-```json
-{
-  "journey_config_id": "journey_123",
-  "relcu_org_id": "relcu_org_456",
-  "fetch_leads_url": "https://api.relcu.com/leads",
-  "fetch_leads_auth_token": "auth_token_789"
-}
-```
-
-#### Required Fields
-- `journey_config_id` (string) - Journey configuration identifier
-- `relcu_org_id` (string) - Relcu organization identifier
-- `fetch_leads_url` (string) - URL for fetching leads from Relcu
-- `fetch_leads_auth_token` (string) - Authentication token for Relcu API
-
-#### Response
-```json
-{
-  "id": "integration_123",
-  "journey_config_id": "journey_123",
-  "relcu_org_id": "relcu_org_456",
-  "fetch_leads_url": "https://api.relcu.com/leads",
-  "fetch_leads_auth_token": "auth_token_789",
-  "created_at": "2024-01-15T10:30:00Z"
-}
-```
-
-#### Error Responses
-- `400 Bad Request` - Missing required fields or invalid request body
-- `401 Unauthorized` - Invalid JWT or insufficient permissions
-- `403 Forbidden` - Journey config does not belong to user
-- `404 Not Found` - Journey config not found
-- `409 Conflict` - Integration already exists for this journey config
-- `500 Internal Server Error` - Failed to create integration
-
----
-
-### Get Relcu Integration
-
-Retrieve a specific Relcu integration by journey configuration ID.
-
-#### Endpoint
-```
-GET /relcu/integrations/{journey_config_id}
-```
-
-#### Authorization
-Requires `kastle-admin` organization access.
-
-#### Path Parameters
-- `journey_config_id` (string, required) - Journey configuration identifier
-
-#### Response
-```json
-{
-  "id": "integration_123",
-  "journey_config_id": "journey_123",
-  "relcu_org_id": "relcu_org_456",
-  "fetch_leads_url": "https://api.relcu.com/leads",
-  "fetch_leads_auth_token": "auth_token_789",
-  "created_at": "2024-01-15T10:30:00Z",
-  "updated_at": "2024-01-15T11:45:00Z"
-}
-```
-
-#### Error Responses
-- `401 Unauthorized` - Invalid JWT or insufficient permissions
-- `403 Forbidden` - Journey config does not belong to user
-- `404 Not Found` - Journey config or integration not found
-- `500 Internal Server Error` - Internal server error
-
----
-
-### Update Relcu Integration
-
-Update an existing Relcu integration.
-
-#### Endpoint
-```
-PUT /relcu/integrations/{journey_config_id}
-```
-
-#### Authorization
-Requires `kastle-admin` organization access.
-
-#### Path Parameters
-- `journey_config_id` (string, required) - Journey configuration identifier
-
-#### Request Body
-```json
-{
-  "relcu_org_id": "relcu_org_789",
-  "fetch_leads_url": "https://api.relcu.com/v2/leads",
-  "fetch_leads_auth_token": "new_auth_token_123"
-}
-```
-
-#### Optional Fields
-- `relcu_org_id` (string) - Relcu organization identifier
-- `fetch_leads_url` (string) - URL for fetching leads from Relcu
-- `fetch_leads_auth_token` (string) - Authentication token for Relcu API
-
-#### Response
-```json
-{
-  "id": "integration_123",
-  "journey_config_id": "journey_123",
-  "relcu_org_id": "relcu_org_789",
-  "fetch_leads_url": "https://api.relcu.com/v2/leads",
-  "fetch_leads_auth_token": "new_auth_token_123",
-  "created_at": "2024-01-15T10:30:00Z",
-  "updated_at": "2024-01-15T12:00:00Z"
-}
-```
-
-#### Error Responses
-- `400 Bad Request` - Invalid request body
-- `401 Unauthorized` - Invalid JWT or insufficient permissions
-- `403 Forbidden` - Journey config does not belong to user
-- `404 Not Found` - Journey config or integration not found
-- `500 Internal Server Error` - Failed to update integration
-
----
-
-### Delete Relcu Integration
-
-Delete a Relcu integration.
-
-#### Endpoint
-```
-DELETE /relcu/integrations/{journey_config_id}
-```
-
-#### Authorization
-Requires `kastle-admin` organization access.
-
-#### Path Parameters
-- `journey_config_id` (string, required) - Journey configuration identifier
-
-#### Response
-```json
-{
-  "message": "Integration deleted successfully"
-}
-```
-
-#### Error Responses
-- `401 Unauthorized` - Invalid JWT or insufficient permissions
-- `403 Forbidden` - Journey config does not belong to user
-- `404 Not Found` - Journey config or integration not found
-- `500 Internal Server Error` - Internal server error
-
----
-
 ## Lead Management
 
 ### Fetch Single Lead
@@ -587,7 +399,7 @@ POST /relcu/fetch-lead
 ```
 
 #### Authorization
-Requires access to Relcu-integrated organizations (`relcu`, `cardinal-financial`).
+Requires access to Relcu-integrated organizations
 
 #### Request Body
 ```json
@@ -636,7 +448,7 @@ POST /relcu/fetch-leads
 ```
 
 #### Authorization
-Requires access to Relcu-integrated organizations (`relcu`, `cardinal-financial`).
+Requires access to Relcu-integrated organizations
 
 #### Request Body
 ```json
@@ -684,7 +496,7 @@ POST /relcu/supress-entity
 ```
 
 #### Authorization
-Requires access to Relcu-integrated organizations (`relcu`, `cardinal-financial`).
+Requires access to Relcu-integrated organizations
 
 #### Request Body
 ```json
@@ -722,7 +534,7 @@ POST /relcu/unsupress-entity
 ```
 
 #### Authorization
-Requires access to Relcu-integrated organizations (`relcu`, `cardinal-financial`).
+Requires access to Relcu-integrated organizations
 
 #### Request Body
 ```json
@@ -760,7 +572,7 @@ POST /relcu/supress-multiple-entities
 ```
 
 #### Authorization
-Requires access to Relcu-integrated organizations (`relcu`, `cardinal-financial`).
+Requires access to Relcu-integrated organizations
 
 #### Request Body
 ```json
@@ -798,7 +610,7 @@ POST /relcu/unsupress-multiple-entities
 ```
 
 #### Authorization
-Requires access to Relcu-integrated organizations (`relcu`, `cardinal-financial`).
+Requires access to Relcu-integrated organizations
 
 #### Request Body
 ```json
@@ -915,8 +727,3 @@ Occurs when:
 5. **Workflow Impact**: Creating, updating, or suppressing entities may affect active campaign workflows and automations.
 
 6. **Deleted Campaigns**: The system maintains a list of deleted campaign IDs that are automatically handled in callback responses.
-
-7. **Organization Restrictions**: Different endpoints require different organization access levels:
-   - Integration management: `kastle-admin`
-   - Lead management: `relcu`, `cardinal-financial`
-   - Callbacks: `relcu`
