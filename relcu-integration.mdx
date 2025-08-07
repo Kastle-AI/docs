@@ -1,0 +1,922 @@
+# Relcu Integration API
+
+The Relcu Integration API provides endpoints for managing Relcu integrations and handling lead data from Relcu systems. This API allows external systems to create, manage, and interact with Relcu integrations within Kastle campaigns.
+
+## Campaign Intake API
+
+The Campaign Intake API allows external systems to manage entities within Kastle campaigns. These endpoints provide full CRUD operations for campaign entities with real-time processing capabilities.
+
+***These endpoints are customizable on a per-agent basis, please contact us if you would like to adjust the schema to add, remove, or modify fields.***
+
+*All of these schema's are examples. For each agent, the schema will be different depending on the required functionality.*
+
+### Entities
+
+Entities are the core objects that are used to send and receive data from the campaign API. Entities will follow the same schema across all endpoints, however, they are configurable on a per-agent basis.
+
+#### Example Entity Schema
+```json
+{
+  "relcuId": "12345",
+  "borrowerEmail": "Joe@Kastle.ai",
+  "borrowerFirstName": "Joe",
+  "borrowerLastName": "Cowles",
+  "borrowerPhone": "+15552359854",
+  "propertyAddress": "855 Brannan",
+  "propertyCity": "San Francisco",
+  "propertyState": "CA",
+  "propertyZipcode": "94103"
+}
+```
+
+### Authentication
+
+All endpoints require JWT authentication. Include your JWT token in the Authorization header:
+
+```json
+{"Authorization": "Bearer {jwt_token}"}
+```
+
+### Base URL
+
+All endpoints use the base path: `/api/v1/campaigns/entities/`
+
+---
+
+## Campaign Intake Endpoints
+
+### List Campaign Entities
+
+Retrieve all entities for a specific campaign with pagination support.
+
+#### Endpoint
+```
+GET /api/v1/campaigns/entities/list/{org_name}/{campaign_id}
+```
+
+#### Path Parameters
+- `org_name` (string, required) - Organization identifier
+- `campaign_id` (string, required) - Campaign identifier
+
+#### Query Parameters
+- `next_token` (string, optional) - Pagination token for retrieving next page
+- `limit` (integer, optional) - Maximum number of entities to return (default: 100)
+
+#### Response
+```json
+{
+  "entities": [
+    {
+      "id": "entity_123",
+      "data": {
+        "relcuId": "12345",
+        "borrowerEmail": "Joe@Kastle.ai",
+        "borrowerFirstName": "Joe",
+        "borrowerLastName": "Cowles",
+        "borrowerPhone": "+15552359854",
+        "propertyAddress": "855 Brannan",
+        "propertyCity": "San Francisco",
+        "propertyState": "CA",
+        "propertyZipcode": "94103"
+      },
+      "status": "active",
+      "created_at": "2024-01-15T10:30:00Z"
+    }
+  ],
+  "next_token": "token_abc123"
+}
+```
+
+#### Error Responses
+- `401 Unauthorized` - Invalid JWT or insufficient permissions
+- `404 Not Found` - Campaign or organization not found
+
+---
+
+### Create Campaign Entity
+
+Add a new entity to an active campaign with real-time processing.
+
+#### Endpoint
+```
+POST /api/v1/campaigns/entities/create/{org_name}/{campaign_id}
+```
+
+#### Path Parameters
+- `org_name` (string, required) - Organization identifier
+- `campaign_id` (string, required) - Campaign identifier
+
+#### Request Body
+```json
+{
+  "relcuId": "12345",
+  "borrowerEmail": "Jane@Kastle.ai",
+  "borrowerFirstName": "Jane",
+  "borrowerLastName": "Smith",
+  "borrowerPhone": "+1555567890",
+  "propertyAddress": "123 Main St",
+  "propertyCity": "San Francisco",
+  "propertyState": "CA",
+  "propertyZipcode": "94102",
+  "customFields": {
+    "leadSource": "website",
+    "priority": "high"
+  }
+}
+```
+
+#### Response
+```json
+{
+  "id": "entity_456",
+  "data": {
+    "relcuId": "12345",
+    "borrowerEmail": "Jane@Kastle.ai",
+    "borrowerFirstName": "Jane",
+    "borrowerLastName": "Smith",
+    "borrowerPhone": "+1555567890",
+    "propertyAddress": "123 Main St",
+    "propertyCity": "San Francisco",
+    "propertyState": "CA",
+    "propertyZipcode": "94102",
+    "customFields": {
+      "leadSource": "website",
+      "priority": "high"
+    }
+  },
+  "status": "created",
+  "created_at": "2024-01-15T10:35:00Z"
+}
+```
+
+#### Error Responses
+- `400 Bad Request` - Invalid entity data
+- `401 Unauthorized` - Invalid JWT or insufficient permissions
+- `404 Not Found` - Campaign or organization not found
+
+---
+
+### Create Multiple Campaign Entities
+
+Add multiple new entities to an active campaign in a single request with batch processing.
+
+#### Endpoint
+```
+POST /api/v1/campaigns/entities/create-multiple/{org_name}/{campaign_id}
+```
+
+#### Path Parameters
+- `org_name` (string, required) - Organization identifier
+- `campaign_id` (string, required) - Campaign identifier
+
+#### Request Body
+```json
+{
+  "entities": [
+    {
+      "relcuId": "12345",
+      "borrowerEmail": "John@Kastle.ai",
+      "borrowerFirstName": "John",
+      "borrowerLastName": "Doe",
+      "borrowerPhone": "+1234567890",
+      "propertyAddress": "456 Oak St",
+      "propertyCity": "San Francisco",
+      "propertyState": "CA",
+      "propertyZipcode": "94104"
+    },
+    {
+      "relcuId": "67890",
+      "borrowerEmail": "Jane@Kastle.ai",
+      "borrowerFirstName": "Jane",
+      "borrowerLastName": "Smith",
+      "borrowerPhone": "+0987654321",
+      "propertyAddress": "789 Pine St",
+      "propertyCity": "San Francisco",
+      "propertyState": "CA",
+      "propertyZipcode": "94105"
+    }
+  ]
+}
+```
+
+#### Response
+```json
+{
+  "results": [
+    {
+      "index": 0,
+      "success": true,
+      "entity": {
+        "id": "entity_789",
+        "data": {
+          "relcuId": "12345",
+          "borrowerEmail": "John@Kastle.ai",
+          "borrowerFirstName": "John",
+          "borrowerLastName": "Doe",
+          "borrowerPhone": "+1555567890",
+          "propertyAddress": "456 Oak St",
+          "propertyCity": "San Francisco",
+          "propertyState": "CA",
+          "propertyZipcode": "94104"
+        },
+        "status": "created"
+      },
+      "status_code": 200
+    },
+    {
+      "index": 1,
+      "success": false,
+      "error": "Invalid email format",
+      "status_code": 400
+    }
+  ],
+  "summary": {
+    "total": 2,
+    "success_count": 1,
+    "failure_count": 1
+  }
+}
+```
+
+#### Status Codes
+- `200 OK` - All entities created successfully
+- `207 Multi-Status` - Partial success (some entities failed)
+- `400 Bad Request` - All entities failed or invalid request format
+- `401 Unauthorized` - Invalid JWT or insufficient permissions
+
+#### Error Responses
+- `400 Bad Request` - Request must contain 'entities' list or entities must be a non-empty list
+- `401 Unauthorized` - Invalid JWT or insufficient permissions
+- `404 Not Found` - Campaign or organization not found
+
+---
+
+### Get Campaign Entity
+
+Retrieve specific entity details and status.
+
+#### Endpoint
+```
+GET /api/v1/campaigns/entities/get/{org_name}/{campaign_id}/{entity_id}
+```
+
+#### Path Parameters
+- `org_name` (string, required) - Organization identifier
+- `campaign_id` (string, required) - Campaign identifier
+- `entity_id` (string, required) - Entity identifier
+
+#### Response
+```json
+{
+  "id": "entity_123",
+  "data": {
+    "relcuId": "12345",
+    "borrowerEmail": "Joe@Kastle.ai",
+    "borrowerFirstName": "Joe",
+    "borrowerLastName": "Cowles",
+    "borrowerPhone": "+12359854",
+    "propertyAddress": "855 Brannan",
+    "propertyCity": "San Francisco",
+    "propertyState": "CA",
+    "propertyZipcode": "94103"
+  },
+  "status": "active",
+  "created_at": "2024-01-15T10:30:00Z",
+  "updated_at": "2024-01-15T11:45:00Z"
+}
+```
+
+#### Error Responses
+- `401 Unauthorized` - Invalid JWT or insufficient permissions
+- `404 Not Found` - Entity, campaign, or organization not found
+
+---
+
+### Update Campaign Entity
+
+Modify entity data and trigger variable updates.
+
+#### Endpoint
+```
+PUT /api/v1/campaigns/entities/update/{org_name}/{campaign_id}/{entity_id}
+```
+
+#### Path Parameters
+- `org_name` (string, required) - Organization identifier
+- `campaign_id` (string, required) - Campaign identifier
+- `entity_id` (string, required) - Entity identifier
+
+#### Request Body
+```json
+{
+  "relcuId": "12345",
+  "borrowerEmail": "Joe.Updated@Kastle.ai",
+  "borrowerFirstName": "Joe",
+  "borrowerLastName": "Cowles Updated",
+  "borrowerPhone": "+15552359854",
+  "propertyAddress": "855 Brannan Updated",
+  "propertyCity": "San Francisco",
+  "propertyState": "CA",
+  "propertyZipcode": "94103",
+  "customFields": {
+    "priority": "medium",
+    "notes": "Updated contact information"
+  }
+}
+```
+
+#### Response
+```json
+{
+  "id": "entity_123",
+  "data": {
+    "relcuId": "12345",
+    "borrowerEmail": "Joe.Updated@Kastle.ai",
+    "borrowerFirstName": "Joe",
+    "borrowerLastName": "Cowles Updated",
+    "borrowerPhone": "+15552359854",
+    "propertyAddress": "855 Brannan Updated",
+    "propertyCity": "San Francisco",
+    "propertyState": "CA",
+    "propertyZipcode": "94103",
+    "customFields": {
+      "priority": "medium",
+      "notes": "Updated contact information"
+    }
+  },
+  "status": "updated",
+  "updated_at": "2024-01-15T12:00:00Z"
+}
+```
+
+#### Error Responses
+- `400 Bad Request` - Invalid entity data
+- `401 Unauthorized` - Invalid JWT or insufficient permissions
+- `404 Not Found` - Entity, campaign, or organization not found
+
+---
+
+### Delete Campaign Entity
+
+Remove entity from campaign and stop associated workflows.
+
+#### Endpoint
+```
+DELETE /api/v1/campaigns/entities/delete/{org_name}/{campaign_id}/{entity_id}/{received_at}
+```
+
+#### Path Parameters
+- `org_name` (string, required) - Organization identifier
+- `campaign_id` (string, required) - Campaign identifier
+- `entity_id` (string, required) - Entity identifier
+- `received_at` (integer, required) - Timestamp when entity was received
+
+#### Response
+```json
+{
+  "id": "entity_123",
+  "status": "deleted",
+  "deleted_at": "2024-01-15T12:30:00Z",
+  "message": "Entity successfully removed from campaign"
+}
+```
+
+#### Error Responses
+- `401 Unauthorized` - Invalid JWT or insufficient permissions
+- `404 Not Found` - Entity, campaign, or organization not found
+
+---
+
+## Relcu Integration Endpoints
+
+The Relcu Integration API provides endpoints for managing Relcu integrations and handling lead data from Relcu systems. These endpoints allow you to create, manage, and interact with Relcu integrations within Kastle campaigns.
+
+### Authentication
+
+All Relcu integration endpoints require JWT authentication. Include your JWT token in the Authorization header:
+
+```json
+{"Authorization": "Bearer {jwt_token}"}
+```
+
+### Authorization Requirements
+
+- **Integration Management Endpoints**: Require `kastle-admin` organization access
+- **Lead Management Endpoints**: Require access to Relcu-integrated organizations (`relcu`, `cardinal-financial`)
+
+---
+
+## Integration Management
+
+### Create Relcu Integration
+
+Create a new Relcu integration for a journey configuration.
+
+#### Endpoint
+```
+POST /relcu/integrations
+```
+
+#### Authorization
+Requires `kastle-admin` organization access.
+
+#### Request Body
+```json
+{
+  "journey_config_id": "journey_123",
+  "relcu_org_id": "relcu_org_456",
+  "fetch_leads_url": "https://api.relcu.com/leads",
+  "fetch_leads_auth_token": "auth_token_789"
+}
+```
+
+#### Required Fields
+- `journey_config_id` (string) - Journey configuration identifier
+- `relcu_org_id` (string) - Relcu organization identifier
+- `fetch_leads_url` (string) - URL for fetching leads from Relcu
+- `fetch_leads_auth_token` (string) - Authentication token for Relcu API
+
+#### Response
+```json
+{
+  "id": "integration_123",
+  "journey_config_id": "journey_123",
+  "relcu_org_id": "relcu_org_456",
+  "fetch_leads_url": "https://api.relcu.com/leads",
+  "fetch_leads_auth_token": "auth_token_789",
+  "created_at": "2024-01-15T10:30:00Z"
+}
+```
+
+#### Error Responses
+- `400 Bad Request` - Missing required fields or invalid request body
+- `401 Unauthorized` - Invalid JWT or insufficient permissions
+- `403 Forbidden` - Journey config does not belong to user
+- `404 Not Found` - Journey config not found
+- `409 Conflict` - Integration already exists for this journey config
+- `500 Internal Server Error` - Failed to create integration
+
+---
+
+### Get Relcu Integration
+
+Retrieve a specific Relcu integration by journey configuration ID.
+
+#### Endpoint
+```
+GET /relcu/integrations/{journey_config_id}
+```
+
+#### Authorization
+Requires `kastle-admin` organization access.
+
+#### Path Parameters
+- `journey_config_id` (string, required) - Journey configuration identifier
+
+#### Response
+```json
+{
+  "id": "integration_123",
+  "journey_config_id": "journey_123",
+  "relcu_org_id": "relcu_org_456",
+  "fetch_leads_url": "https://api.relcu.com/leads",
+  "fetch_leads_auth_token": "auth_token_789",
+  "created_at": "2024-01-15T10:30:00Z",
+  "updated_at": "2024-01-15T11:45:00Z"
+}
+```
+
+#### Error Responses
+- `401 Unauthorized` - Invalid JWT or insufficient permissions
+- `403 Forbidden` - Journey config does not belong to user
+- `404 Not Found` - Journey config or integration not found
+- `500 Internal Server Error` - Internal server error
+
+---
+
+### Update Relcu Integration
+
+Update an existing Relcu integration.
+
+#### Endpoint
+```
+PUT /relcu/integrations/{journey_config_id}
+```
+
+#### Authorization
+Requires `kastle-admin` organization access.
+
+#### Path Parameters
+- `journey_config_id` (string, required) - Journey configuration identifier
+
+#### Request Body
+```json
+{
+  "relcu_org_id": "relcu_org_789",
+  "fetch_leads_url": "https://api.relcu.com/v2/leads",
+  "fetch_leads_auth_token": "new_auth_token_123"
+}
+```
+
+#### Optional Fields
+- `relcu_org_id` (string) - Relcu organization identifier
+- `fetch_leads_url` (string) - URL for fetching leads from Relcu
+- `fetch_leads_auth_token` (string) - Authentication token for Relcu API
+
+#### Response
+```json
+{
+  "id": "integration_123",
+  "journey_config_id": "journey_123",
+  "relcu_org_id": "relcu_org_789",
+  "fetch_leads_url": "https://api.relcu.com/v2/leads",
+  "fetch_leads_auth_token": "new_auth_token_123",
+  "created_at": "2024-01-15T10:30:00Z",
+  "updated_at": "2024-01-15T12:00:00Z"
+}
+```
+
+#### Error Responses
+- `400 Bad Request` - Invalid request body
+- `401 Unauthorized` - Invalid JWT or insufficient permissions
+- `403 Forbidden` - Journey config does not belong to user
+- `404 Not Found` - Journey config or integration not found
+- `500 Internal Server Error` - Failed to update integration
+
+---
+
+### Delete Relcu Integration
+
+Delete a Relcu integration.
+
+#### Endpoint
+```
+DELETE /relcu/integrations/{journey_config_id}
+```
+
+#### Authorization
+Requires `kastle-admin` organization access.
+
+#### Path Parameters
+- `journey_config_id` (string, required) - Journey configuration identifier
+
+#### Response
+```json
+{
+  "message": "Integration deleted successfully"
+}
+```
+
+#### Error Responses
+- `401 Unauthorized` - Invalid JWT or insufficient permissions
+- `403 Forbidden` - Journey config does not belong to user
+- `404 Not Found` - Journey config or integration not found
+- `500 Internal Server Error` - Internal server error
+
+---
+
+## Lead Management
+
+### Fetch Single Lead
+
+Fetch a specific lead from Relcu by relcu_id and send to campaign.
+
+#### Endpoint
+```
+POST /relcu/fetch-lead
+```
+
+#### Authorization
+Requires access to Relcu-integrated organizations (`relcu`, `cardinal-financial`).
+
+#### Request Body
+```json
+{
+  "journey_config_id": "journey_123",
+  "campaign_id": "campaign_456",
+  "relcu_id": "relcu_lead_789",
+  "test_phone_number": "+1234567890"
+}
+```
+
+#### Required Fields
+- `journey_config_id` (string) - Journey configuration identifier
+- `campaign_id` (string) - Campaign identifier
+- `relcu_id` (string) - Relcu lead identifier
+
+#### Optional Fields
+- `test_phone_number` (string) - Test phone number for testing purposes
+
+#### Response
+```json
+{
+  "message": "Lead fetched and sent to campaign successfully",
+  "entity_id": "entity_123",
+  "relcu_id": "relcu_lead_789",
+  "campaign_id": "campaign_456"
+}
+```
+
+#### Error Responses
+- `400 Bad Request` - Missing required fields or validation error
+- `401 Unauthorized` - Invalid JWT or insufficient permissions
+- `403 Forbidden` - Journey config or campaign does not belong to user
+- `404 Not Found` - Journey config or campaign not found
+- `500 Internal Server Error` - Internal server error
+
+---
+
+### Fetch Multiple Leads
+
+Fetch leads from Relcu and send to multiple campaigns.
+
+#### Endpoint
+```
+POST /relcu/fetch-leads
+```
+
+#### Authorization
+Requires access to Relcu-integrated organizations (`relcu`, `cardinal-financial`).
+
+#### Request Body
+```json
+{
+  "journey_config_id": "journey_123",
+  "campaign_ids": ["campaign_456", "campaign_789"],
+  "max_leads": 100,
+  "should_update_lead_status": false
+}
+```
+
+#### Required Fields
+- `journey_config_id` (string) - Journey configuration identifier
+- `campaign_ids` (array) - List of campaign identifiers
+
+#### Optional Fields
+- `max_leads` (integer) - Maximum number of leads to fetch (default: 100)
+- `should_update_lead_status` (boolean) - Whether to update lead status in Relcu (default: false)
+
+#### Response
+```json
+{
+  "message": "Leads fetched and sent to campaign successfully"
+}
+```
+
+#### Error Responses
+- `400 Bad Request` - Missing required fields or validation error
+- `401 Unauthorized` - Invalid JWT or insufficient permissions
+- `403 Forbidden` - Journey config or campaign does not belong to user
+- `404 Not Found` - Journey config or campaign not found
+- `500 Internal Server Error` - Internal server error
+
+---
+
+## Entity Management
+
+### Suppress Entity
+
+Suppress an entity from a campaign by setting `entity_stopped` to true.
+
+#### Endpoint
+```
+POST /relcu/supress-entity
+```
+
+#### Authorization
+Requires access to Relcu-integrated organizations (`relcu`, `cardinal-financial`).
+
+#### Request Body
+```json
+{
+  "campaign_id": "campaign_456",
+  "relcu_id": "relcu_lead_789"
+}
+```
+
+#### Required Fields
+- `campaign_id` (string) - Campaign identifier
+- `relcu_id` (string) - Relcu lead identifier
+
+#### Response
+```json
+{
+  "message": "Entity supressed successfully"
+}
+```
+
+#### Error Responses
+- `401 Unauthorized` - Invalid JWT or insufficient permissions
+- `404 Not Found` - Entity or outbound campaign entity not found
+- `500 Internal Server Error` - Failed to update outbound campaign entity
+
+---
+
+### Unsuppress Entity
+
+Unsuppress an entity from a campaign by setting `entity_stopped` to false.
+
+#### Endpoint
+```
+POST /relcu/unsupress-entity
+```
+
+#### Authorization
+Requires access to Relcu-integrated organizations (`relcu`, `cardinal-financial`).
+
+#### Request Body
+```json
+{
+  "campaign_id": "campaign_456",
+  "relcu_id": "relcu_lead_789"
+}
+```
+
+#### Required Fields
+- `campaign_id` (string) - Campaign identifier
+- `relcu_id` (string) - Relcu lead identifier
+
+#### Response
+```json
+{
+  "message": "Entity unsupressed successfully"
+}
+```
+
+#### Error Responses
+- `401 Unauthorized` - Invalid JWT or insufficient permissions
+- `404 Not Found` - Entity or outbound campaign entity not found
+- `500 Internal Server Error` - Failed to update outbound campaign entity
+
+---
+
+### Suppress Multiple Entities
+
+Suppress multiple entities from a campaign.
+
+#### Endpoint
+```
+POST /relcu/supress-multiple-entities
+```
+
+#### Authorization
+Requires access to Relcu-integrated organizations (`relcu`, `cardinal-financial`).
+
+#### Request Body
+```json
+{
+  "campaign_id": "campaign_456",
+  "relcu_ids": ["relcu_lead_789", "relcu_lead_101", "relcu_lead_112"]
+}
+```
+
+#### Required Fields
+- `campaign_id` (string) - Campaign identifier
+- `relcu_ids` (array) - List of Relcu lead identifiers
+
+#### Response
+```json
+{
+  "message": "Entities supressed successfully"
+}
+```
+
+#### Error Responses
+- `401 Unauthorized` - Invalid JWT or insufficient permissions
+- `404 Not Found` - Entity or outbound campaign entity not found
+- `500 Internal Server Error` - Failed to update outbound campaign entity
+
+---
+
+### Unsuppress Multiple Entities
+
+Unsuppress multiple entities from a campaign.
+
+#### Endpoint
+```
+POST /relcu/unsupress-multiple-entities
+```
+
+#### Authorization
+Requires access to Relcu-integrated organizations (`relcu`, `cardinal-financial`).
+
+#### Request Body
+```json
+{
+  "campaign_id": "campaign_456",
+  "relcu_ids": ["relcu_lead_789", "relcu_lead_101", "relcu_lead_112"]
+}
+```
+
+#### Required Fields
+- `campaign_id` (string) - Campaign identifier
+- `relcu_ids` (array) - List of Relcu lead identifiers
+
+#### Response
+```json
+{
+  "message": "Entities unsupressed successfully"
+}
+```
+
+#### Error Responses
+- `401 Unauthorized` - Invalid JWT or insufficient permissions
+- `404 Not Found` - Entity or outbound campaign entity not found
+- `500 Internal Server Error` - Failed to update outbound campaign entity
+
+---
+
+## Callback Endpoints
+
+### Received Response Callback
+
+Callback endpoint for Relcu to notify when a lead responds. This endpoint automatically suppresses the entity from the campaign.
+
+#### Endpoint
+```
+POST /relcu/received-response
+```
+
+#### Authorization
+Requires `relcu` organization access.
+
+#### Request Body
+```json
+{
+  "org_id": "org_123",
+  "campaign_id": "campaign_456",
+  "relcu_id": "relcu_lead_789"
+}
+```
+
+#### Required Fields
+- `org_id` (string) - Organization identifier
+- `campaign_id` (string) - Campaign identifier
+- `relcu_id` (string) - Relcu lead identifier
+
+#### Response
+```json
+{
+  "status": "Marked Relcu ID: relcu_lead_789 as completed"
+}
+```
+
+#### Error Responses
+- `400 Bad Request` - Missing required fields
+- `401 Unauthorized` - Invalid JWT or insufficient permissions
+- `403 Forbidden` - Campaign does not belong to org
+- `404 Not Found` - Entity, campaign, or outbound campaign entity not found
+- `500 Internal Server Error` - Failed to update outbound campaign entity
+
+---
+
+## Common Error Responses
+
+All endpoints may return the following errors:
+
+### 401 Unauthorized
+```json
+{
+  "error": "Unauthorized"
+}
+```
+
+Occurs when:
+- Invalid or missing JWT token
+- JWT user ID doesn't match organization
+- Organization doesn't have required permissions
+
+### 404 Not Found
+```json
+{
+  "error": "Resource not found"
+}
+```
+
+### 500 Internal Server Error
+```json
+{
+  "error": "Internal server error"
+}
+```
+
+---
+
+## Integration Notes
+
+1. **Real-time Processing**: Lead fetching and entity management trigger immediate processing in the campaign workflow.
+
+2. **Batch Operations**: Use the fetch-leads endpoint for bulk lead imports to improve performance.
+
+3. **Authorization**: All endpoints validate that the JWT user has appropriate permissions for the requested operations.
+
+4. **Data Validation**: Lead data is validated according to campaign-specific rules before processing.
+
+5. **Workflow Impact**: Creating, updating, or suppressing entities may affect active campaign workflows and automations.
+
+6. **Deleted Campaigns**: The system maintains a list of deleted campaign IDs that are automatically handled in callback responses.
+
+7. **Organization Restrictions**: Different endpoints require different organization access levels:
+   - Integration management: `kastle-admin`
+   - Lead management: `relcu`, `cardinal-financial`
+   - Callbacks: `relcu`
