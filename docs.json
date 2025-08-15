@@ -23,7 +23,8 @@
             "group": "Calls",
             "pages": [
               "api-reference/endpoint/get",
-              "api-reference/endpoint/get-by-id"
+              "api-reference/endpoint/get-by-id",
+              "api-reference/endpoint/get-recording-url"
             ]
           }
         ]
