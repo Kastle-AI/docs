@@ -385,6 +385,83 @@ DELETE /api/v1/campaigns/entities/delete/{org_name}/{campaign_id}/{entity_id}/{r
 - `401 Unauthorized` - Invalid JWT or insufficient permissions
 - `404 Not Found` - Entity, campaign, or organization not found
 
+### Stop Campaign Entity
+
+Stop a specific entity in a campaign. This sets the entity's status to stopped and halts associated workflows for that entity.
+
+#### Endpoint
+```
+POST /api/v1/campaigns/entities/stop/{org_name}/{campaign_id}/{entity_id}
+```
+
+#### Path Parameters
+- `org_name` (string, required) - Organization identifier
+- `campaign_id` (string, required) - Campaign identifier
+- `entity_id` (string, required) - Entity identifier
+
+#### Response
+```json
+{
+  "entity": "61e4e1e6-1a60-4099-8937-be39e660133a",
+  "message": "Entity stopped successfully"
+}
+```
+
+#### Error Response Example
+```json
+{
+  "entity": "61e4e1e6-1a60-4099-8937-be39e660133a",
+  "error": "Entity not found"
+}
+```
+
+#### Error Responses
+- `401 Unauthorized` - Invalid JWT or insufficient permissions
+- `404 Not Found` - Entity, campaign, or organization not found
+- `500 Internal Server Error` - Internal server error
+
+---
+
+### Stop Multiple Campaign Entities
+
+Stop multiple entities in a campaign in a single request.
+
+#### Endpoint
+```
+POST /api/v1/campaigns/entities/stop-multiple/{org_name}/{campaign_id}
+```
+
+#### Path Parameters
+- `org_name` (string, required) - Organization identifier
+- `campaign_id` (string, required) - Campaign identifier
+
+#### Request Body
+```json
+{
+  "entity_ids": ["61e4e1e6-1a60-4099-8937-be39e660133a", "5226d1e6-1a60-4099-8937-be29e660133b"]
+}
+```
+
+#### Response
+```json
+{
+  "entities": {
+    "61e4e1e6-1a60-4099-8937-be39e660133a": 200,
+    "5226d1e6-1a60-4099-8937-be29e660133b": 404
+  },
+  "success_count": 1
+}
+```
+
+#### Error Responses
+- `400 Bad Request` - Invalid request format or missing `entity_ids`
+- `401 Unauthorized` - Invalid JWT or insufficient permissions
+- `404 Not Found` - Campaign or organization not found
+- `500 Internal Server Error` - Internal server error
+
+#### NOTE: The response will return 407 if any of the entities are not found
+---
+
 ---
 
 ## Lead Management
@@ -492,7 +569,7 @@ Suppress an entity from a campaign by setting `entity_stopped` to true.
 
 #### Endpoint
 ```
-POST /relcu/supress-entity
+POST /relcu/suppress-entity
 ```
 
 #### Authorization
@@ -513,7 +590,7 @@ Requires access to Relcu-integrated organizations
 #### Response
 ```json
 {
-  "message": "Entity supressed successfully"
+  "message": "Entity suppressed successfully"
 }
 ```
 
@@ -530,7 +607,7 @@ Unsuppress an entity from a campaign by setting `entity_stopped` to false.
 
 #### Endpoint
 ```
-POST /relcu/unsupress-entity
+POST /relcu/unsuppress-entity
 ```
 
 #### Authorization
@@ -551,7 +628,7 @@ Requires access to Relcu-integrated organizations
 #### Response
 ```json
 {
-  "message": "Entity unsupressed successfully"
+  "message": "Entity unsuppressed successfully"
 }
 ```
 
@@ -568,7 +645,7 @@ Suppress multiple entities from a campaign.
 
 #### Endpoint
 ```
-POST /relcu/supress-multiple-entities
+POST /relcu/suppress-multiple-entities
 ```
 
 #### Authorization
@@ -589,7 +666,7 @@ Requires access to Relcu-integrated organizations
 #### Response
 ```json
 {
-  "message": "Entities supressed successfully"
+  "message": "Entities suppressed successfully"
 }
 ```
 
@@ -606,7 +683,7 @@ Unsuppress multiple entities from a campaign.
 
 #### Endpoint
 ```
-POST /relcu/unsupress-multiple-entities
+POST /relcu/unsuppress-multiple-entities
 ```
 
 #### Authorization
@@ -627,7 +704,7 @@ Requires access to Relcu-integrated organizations
 #### Response
 ```json
 {
-  "message": "Entities unsupressed successfully"
+  "message": "Entities unsuppressed successfully"
 }
 ```
 
