@@ -1,0 +1,390 @@
+# Kastle AI - Sales Call Agent API Documentation
+
+## Overview
+
+This documentation outlines the API integration for Kastle AI's sales call agent. The system processes lead entities and makes automated outbound sales calls based on the data you provide.
+
+There are two types of APIs available:
+- **Test API Endpoints**: For testing and development with a pre-configured campaign
+- **Production Entity Management APIs**: For production campaign
+
+## Test API Endpoints
+
+These endpoints use a pre-configured test campaign and are ideal for development and testing.
+
+### Create Entity
+
+**Endpoint:** `/figure-lending/sales-call/test/create`  
+**Method:** `POST`  
+**Content-Type:** `application/json`
+**Authentication:** JWT token required
+
+#### Request Body
+
+```json
+{
+  "phone_number": "string",
+  "call_params": {
+    "first_name": "string",
+    "last_name": "string",
+    "source": "string (optional)",
+    "loan_amount": "string (optional)"
+  },
+  "custom_metadata": {
+    "account_id": "string",
+    "task_id": "string"
+  }
+}
+```
+
+#### Field Validation Rules
+
+- **phone_number**: Must be in valid US, CA, or PR format
+- **call_params**: Must be an object containing:
+  - **first_name**: Required, non-empty string
+  - **last_name**: Required, non-empty string
+  - **source**: Optional
+  - **loan_amount**: Optional
+- **custom_metadata**: Must be an object containing:
+  - **account_id**: Required, non-empty string
+  - **task_id**: Required, non-empty string
+
+#### Success Response
+
+```json
+{
+  "message": "Campaign entity created successfully",
+  "entity_id": "string",
+  "data": {
+    "id": "string",
+    "phone_number": "string",
+    "first_name": "string",
+    "last_name": "string",
+    "task_id": "string",
+    "source": "string",
+    "loan_amount": "string"
+  }
+}
+```
+
+### Get Entity
+
+**Endpoint:** `/figure-lending/sales-call/test/get/<entity_id>`  
+**Method:** `GET`  
+**Authentication:** JWT token required
+
+#### Success Response
+
+```json
+{
+  "id": "string",
+  "data": {
+    "id": "string",
+    "phone_number": "string",
+    "first_name": "string",
+    "last_name": "string",
+    "task_id": "string",
+    "source": "string",
+    "loan_amount": "string"
+  },
+  "created_at": "2024-01-15T10:30:00Z",
+  "updated_at": "2024-01-15T11:45:00Z"
+}
+```
+
+### Update Entity
+
+**Endpoint:** `/figure-lending/sales-call/test/update/<entity_id>`  
+**Method:** `PUT`  
+**Content-Type:** `application/json`
+**Authentication:** JWT token required
+
+> Note: Update is blocked if the campaign is active (returns 405)
+
+
+#### Request Body
+
+```json
+{
+  "phone_number": "string",
+  "call_params": {
+    "first_name": "string",
+    "last_name": "string"
+  },
+  "custom_metadata": {
+    "account_id": "string"
+  }
+}
+```
+
+#### Validation Notes
+
+- If provided, **phone_number** must be a valid US/CA/PR number
+- If provided, **call_params** must be an object; may include `first_name`, `last_name`
+- If provided, **custom_metadata** must be an object; may include `account_id`
+- Update is blocked if the campaign is active (returns 405)
+
+#### Success Response
+
+```json
+{
+  "message": "Campaign entity updated successfully",
+  "entity_id": "string"
+}
+```
+
+### Delete Entity
+
+**Endpoint:** `/figure-lending/sales-call/test/delete/<entity_id>`  
+**Method:** `DELETE`  
+**Authentication:** JWT token required
+
+> Note: Delete is blocked if the campaign is active (returns 405)
+
+#### Success Response
+
+```json
+{
+  "message": "Campaign entity deleted successfully",
+  "entity_id": "string"
+}
+```
+
+### List Entities
+
+**Endpoint:** `/figure-lending/sales-call/test/list`  
+**Method:** `GET`  
+**Authentication:** JWT token required
+
+#### Query Parameters
+
+- **next_token** (optional): Token for pagination
+- **limit** (optional): Maximum number of entities to return
+
+#### Success Response
+
+```json
+{
+  "entities": [
+    {
+      "entity_id": "string",
+      "created_at": "timestamp",
+      "id": "string",
+      "phone_number": "string",
+      "first_name": "string",
+      "last_name": "string",
+      "task_id": "string",
+      "source": "string",
+      "loan_amount": "string"
+    }
+  ],
+  "next_token": "string"
+}
+```
+
+## Error Responses
+
+These error responses apply to all test API endpoints above.
+
+**400 Bad Request - Validation Errors:**
+```json
+{
+  "error": "Validation failed",
+  "missing_fields": ["field1", "field2"],
+  "validation_errors": ["error1", "error2"]
+}
+```
+
+**401 Unauthorized:**
+```json
+{
+  "error": "Unauthorized"
+}
+```
+
+**404 Not Found - Campaign:**
+```json
+{
+  "error": "Campaign not found"
+}
+```
+
+**405 Method Not Allowed - Campaign Status:**
+```json
+{
+  "error": "Campaign is active"
+}
+```
+
+**500 Internal Server Error:**
+```json
+{
+  "error": "Failed to create campaign entity"
+}
+```
+
+## Production Entity Management APIs
+
+These endpoints are for production use. All endpoints require JWT authentication.
+
+> Note: Contact Kastle AI support to get your production campaign ID and API access.
+
+### Create Entity
+
+**Endpoint:** `/figure-lending/sales-call/prod/create`
+**Method:** `POST`
+**Content-Type:** `application/json`
+**Authentication:** JWT token required
+
+#### Request Body
+
+```json
+{
+  "phone_number": "string",
+  "call_params": {
+    "first_name": "string",
+    "last_name": "string",
+    "source": "string (optional)",
+    "loan_amount": "string (optional)"
+  },
+  "custom_metadata": {
+    "account_id": "string",
+    "task_id": "string"
+  }
+}
+```
+
+#### Success Response
+
+```json
+{
+  "message": "Campaign entity created successfully",
+  "entity_id": "string",
+  "data": {
+    "id": "string",
+    "phone_number": "string",
+    "first_name": "string",
+    "last_name": "string",
+    "task_id": "string",
+    "source": "string",
+    "loan_amount": "string"
+  }
+}
+```
+
+### Update Entity
+
+**Endpoint:** `/figure-lending/sales-call/prod/update/<entity_id>`
+**Method:** `PUT`
+**Content-Type:** `application/json`
+**Authentication:** JWT token required
+
+#### Request Body
+All fields are optional. Only provide the fields you want to update.
+
+```json
+{
+  "phone_number": "string",
+  "call_params": {
+    "first_name": "string",
+    "last_name": "string"
+  },
+  "custom_metadata": {
+    "account_id": "string"
+  }
+}
+```
+
+#### Success Response
+
+```json
+{
+  "message": "Campaign entity updated successfully",
+  "entity_id": "string"
+}
+```
+
+### Delete Entity
+
+**Endpoint:** `/figure-lending/sales-call/prod/delete/<entity_id>`
+**Method:** `DELETE`
+**Authentication:** JWT token required
+
+#### Success Response
+
+```json
+{
+  "message": "Campaign entity deleted successfully",
+  "entity_id": "string"
+}
+```
+
+### List Entities
+
+**Endpoint:** `/figure-lending/sales-call/prod/list`
+**Method:** `GET`
+**Authentication:** JWT token required
+
+#### Query Parameters
+
+- **next_token** (optional): Token for pagination
+- **limit** (optional): Maximum number of entities to return
+
+#### Success Response
+
+```json
+{
+  "entities": [
+    {
+      "entity_id": "string",
+      "created_at": "timestamp",
+      "id": "string",
+      "phone_number": "string",
+      "first_name": "string",
+      "last_name": "string",
+      "task_id": "string",
+      "source": "string",
+      "loan_amount": "string"
+    }
+  ],
+  "next_token": "string"
+}
+```
+
+## Callback Configuration
+
+Configure a webhook endpoint to receive call results and conversation summaries from Kastle AI after each outbound call is completed.
+
+### Webhook Request Format
+
+When a call is completed, Kastle AI will send a POST request to your configured webhook endpoint:
+
+```json
+{
+  "Note_Type": "Call",
+  "Call_Type": "Outgoing",
+  "Reason": "Other",
+  "Loan": "account_id",
+  "Disposition": "Voicemail|Connected|No Answer|Busy",
+  "Note": "Call summary text with conversation details",
+  "Timestamp": "YYYY-MM-DD HH:MM:SS",
+  "Duration": "MM:SS"
+}
+```
+
+### Data Export Alternative
+
+If webhook integration is not suitable, Kastle AI can provide periodic data exports of all call records via:
+- Secure file transfer (SFTP/S3)
+- Scheduled API dumps
+- Custom data delivery methods
+
+Please specify your preferred delivery method when setting up the integration.
+
+## Support and Integration
+
+For questions, issues, or to set up your production integration:
+
+- **Technical Support**: Send us a message on our [Slack channel](https://join.slack.com/share/enQtODgxNTg1ODUyOTc3OC1iN2NhMmY3MzA4MDFmNzg1MjNjNWE1MGQ0ODI2MGM1ODM3YWRmYWI5YTY2NmNjOTdkMWZhYjllNjdmMmRkNjIz)
+- **Production Setup**: Contact us to configure your production campaign ID and webhook endpoints
+- **API Testing**: Use the test endpoints above to validate your integration before going live 
