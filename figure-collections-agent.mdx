@@ -1,0 +1,113 @@
+# Kastle AI - Payment Collections Agent API Documentation
+
+## Overview
+
+This documentation outlines the API integration for Kastle AI's payment collections agent. The system processes borrower entities and makes automated outbound calls based on the data you provide.
+
+There are two types of APIs that will be made available:
+- **Test API Endpoints**: For testing and development with a pre-configured campaign
+- **Production Entity Management APIs**: For production campaigns with your own campaign IDs
+
+## Data Requirements
+
+The following is a list of data fields for the payment collections agent:
+
+| Field                   | Field Description                                                                 | Data Type |
+|--------------------------|-----------------------------------------------------------------------------------|-----------|
+| FirstName               | Customer first name                                                               | String    |
+| LastName                | Customer last name                                                                | String    |
+| DOB                     | Customer's date of birth, in YYYY-MM-DD format                                     | String    |
+| TaxIDLastFour           | Last four digits of customer's social security number                             | Number    |
+| LoanID                  | The unique identifier for the customer's loan, used for account lookup and verification | Number    |
+| PhoneNumber             | Customer's phone number                                                           | Number    |
+| BorrowerEmail           | Customer's email address                                                          | String    |
+| PropertyAddress         | Customer's property address - street address                                      | String    |
+| PropertyCity            | Customer's property address - city                                                | String    |
+| PropertyState           | Customer's property address - state                                               | String    |
+| PropertyZip             | Customer's property address - ZIP code                                            | Number    |
+| MailingAddress          | Customer's mailing address - street address                                       | String    |
+| MailingCity             | Customer's mailing address - city                                                 | String    |
+| MailingState            | Customer's mailing address - state                                                | String    |
+| MailingZip              | Customer's mailing address - ZIP code                                             | Number    |
+| MonthlyPayment          | The regular monthly payment amount due.                                           | Number    |
+| TotalAmountDue          | The total amount currently due including principal, interest, escrow, and fees.   | Number    |
+| LateChargesBalance      | The amount of any late fees currently assessed on the account                     | Number    |
+| PrincipalBalance        | The current total balance of the account                                          | Number    |
+| PendingPmt              | Boolean indicator of whether there's a payment currently being processed but not yet posted | Boolean   |
+| HasAutomaticPayments    | Boolean indicator of whether the customer is enrolled in automatic payments       | Boolean   |
+| DaysLate                | The number of days the account is past due, if applicable.                        | Number    |
+| NextPaymentDueDate      | The date when the customer's next payment is due, in YYYY-MM-DD format            | String    |
+| AccountType             | The type of account being used for automatic payments (checking or savings).      | String    |
+| AccountNumberLastFour   | The last four digits of the customer's bank account number used for payments.     | Number    |
+| RoutingNumber           | The last four digits of the bank routing number used for payments                 | Number    |
+| LoanStatus              | The current status of the loan (e.g., CURRENT, DELINQUENT, LOSS_MITIGATION)       | String    |
+| LastContactDate         | The date when the borrower was last contacted                                     | String    |
+| Language                | Code indicating the customer's preferred language (en=English, es=Spanish)        | String    |
+| BorrowerDeceased        | Boolean indicator of whether the borrower is deceased                             | Boolean   |
+| EscrowBalance           | The current balance in the escrow account for taxes and insurance                 | Number    |
+| InterestRate            | The current interest rate applied to the account                                  | Number    |
+| LastPaymentHistory      | A brief summary of the last few transaction activity                              | String    |
+| LastPaymentDate         | The date when the most recent payment was received, in YYYY-MM-DD format          | String    |
+| SecondBorrowerFirstName | First name of co-borrower on account (if any)                                     | String    |
+| SecondBorrowerLastName  | Last name of co-borrower on account (if any)                                      | String    |
+| SecondBorrowerDOB       | Date of birth of co-borrower on account (if any)                                  | String    |
+| InsuranceInfo           | Insurance information for the loan account                                        | String    |
+
+### Example Data
+
+See below for an example JSON schema of the datapoints above, with example data.
+
+```json
+{
+  "FirstName": "John",
+  "LastName": "Smith",
+  "DOB": "1973-06-15",
+  "TaxIDLastFour": 6394,
+  "LoanID": 1234567,
+  "PhoneNumber": "+19876543210",
+  "BorrowerEmail": "john@kastle.ai",
+  "PropertyAddress": "123 Goodwin Street",
+  "PropertyCity": "San Francisco",
+  "PropertyState": "California",
+  "PropertyZip": 94103,
+  "MailingAddress": "123 Goodwin Street",
+  "MailingCity": "San Francisco",
+  "MailingState": "California",
+  "MailingZip": 94013,
+  "MonthlyPayment": 1250,
+  "TotalAmountDue": 1500,
+  "LateChargesBalance": 250,
+  "PrincipalBalance": 45000,
+  "PendingPmt": false,
+  "HasAutomaticPayments": false,
+  "DaysLate": 10,
+  "NextPaymentDueDate": "2025-09-28",
+  "AccountType": "Checking",
+  "AccountNumberLastFour": 1234,
+  "RoutingNumber": 9876,
+  "LoanStatus": "Delinquent",
+  "LastContactDate": "2025-08-15",
+  "Language": "en",
+  "BorrowerDeceased": false,
+  "EscrowBalance": 0,
+  "InterestRate": 6.25,
+  "LastPaymentHistory": "TEXT: Paid Date: 2025-08-28| Pmt Amt: 1713.76| Trans Desc:ACH| Trans Note: TEXT: Paid Date: 2025-07-28| Pmt Amt: 1245.12| Trans Desc:Correction| Trans Note: None TEXT: Paid Date: 2025-06-29| Pmt Amt: 1675.89| Trans Desc:ACH| Trans Note: ",
+  "LastPaymentDate": "2025-08-28",
+  "SecondBorrowerFirstName": "Kelly",
+  "SecondBorrowerLastName": "Smith",
+  "SecondBorrowerDOB": "1975-06-16",
+  "InsuranceInfo": "Kastle Insurance Company"
+}
+```
+
+## API Endpoints
+
+Test and production API information for this implementation are TBD and will be provided upon engagement.
+
+## Support and Integration
+
+For questions, issues, or to set up your production integration:
+
+- **Technical Support**: Send us a message on our [Slack channel](https://join.slack.com/share/enQtODgxNTg1ODUyOTc3OC1iN2NhMmY3MzA4MDFmNzg1MjNjNWE1MGQ0ODI2MGM1ODM3YWRmYWI5YTY2NmNjOTdkMWZhYjllNjdmMmRkNjIz)
+- **Production Setup**: Contact us to configure your production campaign ID and webhook endpoints
+- **API Testing**: Use the test endpoints above (TBD) to validate your integration before going live 
