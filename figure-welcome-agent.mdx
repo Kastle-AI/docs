@@ -403,6 +403,22 @@ All fields are optional. Only provide the fields you want to update.
 }
 ```
 
+### Stop Entity
+
+**Endpoint:** `/figure-lending/welcome-call/prod/stop/<entity_id>`
+**Method:** `PUT`
+**Authentication:** JWT token required
+
+This endpoint allows you to stop outbound calls for a specific entity. The entity will remain in the campaign but will no longer receive calls.
+
+#### Success Response
+
+```json
+{
+  "message": "Entity stopped successfully"
+}
+```
+
 ## Callback Configuration
 
 Configure a webhook endpoint to receive call results and conversation summaries from Kastle AI after each outbound call is completed.
