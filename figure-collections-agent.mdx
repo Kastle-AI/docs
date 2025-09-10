@@ -37,9 +37,12 @@ The following is a list of data fields for the payment collections agent:
 | HasAutomaticPayments    | Boolean indicator of whether the customer is enrolled in automatic payments       | Boolean   |
 | DaysLate                | The number of days the account is past due, if applicable.                        | Number    |
 | NextPaymentDueDate      | The date when the customer's next payment is due, in YYYY-MM-DD format            | String    |
-| AccountType             | The type of account being used for automatic payments (checking or savings).      | String    |
-| AccountNumberLastFour   | The last four digits of the customer's bank account number used for payments.     | Number    |
-| RoutingNumber           | The last four digits of the bank routing number used for payments                 | Number    |
+| PrimaryAccountType      | The type of primary account being used for automatic payments (checking or savings). | String    |
+| PrimaryAccountNumberLastFour | The last four digits of the customer's primary bank account number used for payments. | Number    |
+| PrimaryRoutingNumber    | The last four digits of the primary bank routing number used for payments         | Number    |
+| SecondaryAccountType    | The type of secondary account being used for automatic payments (checking or savings). | String    |
+| SecondaryAccountNumberLastFour | The last four digits of the customer's secondary bank account number used for payments. | Number    |
+| SecondaryRoutingNumber  | The last four digits of the secondary bank routing number used for payments       | Number    |
 | LoanStatus              | The current status of the loan (e.g., CURRENT, DELINQUENT, LOSS_MITIGATION)       | String    |
 | LastContactDate         | The date when the borrower was last contacted                                     | String    |
 | Language                | Code indicating the customer's preferred language (en=English, es=Spanish)        | String    |
@@ -82,9 +85,12 @@ See below for an example JSON schema of the datapoints above, with example data.
   "HasAutomaticPayments": false,
   "DaysLate": 10,
   "NextPaymentDueDate": "2025-09-28",
-  "AccountType": "Checking",
-  "AccountNumberLastFour": 1234,
-  "RoutingNumber": 9876,
+  "PrimaryAccountType": "Checking",
+  "PrimaryAccountNumberLastFour": 1234,
+  "PrimaryRoutingNumber": 9876,
+  "SecondaryAccountType": "Savings",
+  "SecondaryAccountNumberLastFour": 5678,
+  "SecondaryRoutingNumber": 5432,
   "LoanStatus": "Delinquent",
   "LastContactDate": "2025-08-15",
   "Language": "en",
