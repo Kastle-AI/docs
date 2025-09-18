@@ -1,0 +1,123 @@
+# Kastle AI - Figures Sales Call Agent API Documentation
+
+## Overview
+
+This API powers Kastle AI’s outbound call agent, which processes lead entities and makes automated outbound calls.  
+Two environments are available:
+
+- **Test API** – pre-configured campaign for development and testing.  
+- **Production API** – for live campaigns (requires a production campaign ID and credentials from Kastle AI support).  
+
+All endpoints require JWT authentication with valid Figure Lending organization credentials.
+
+---
+
+## Endpoints
+
+### Create Entity
+
+- **Test:** `/figure-sales/sales-call/test/create`  
+- **Prod:** `/figure-sales/sales-call/prod/create`  
+- **Method:** `POST`  
+- **Content-Type:** `application/json`  
+- **Authentication:** JWT token required  
+
+#### Request Body
+```json
+{
+  "id": "string",
+  "first_name": "string",
+  "last_name": "string",
+  "phone_number": "string",
+  "provided_state": "string"
+}
+```
+
+#### Field Validation Rules
+- **id**: Account id used in Salesforce API dispositions
+- **first_name**: First name of the lead
+- **last_name**: Last name of the lead
+- **phone_number**: Must be in valid US, CA, or PR format
+- **provided_state**: Two letter state code
+
+#### Success Response
+```json
+    {
+    "data": {
+        "first_name": "string",
+        "id": "string",
+        "last_name": "string",
+        "phone_number": "string",
+        "provided_state": "string",
+        "task_id": "string"
+    },
+    "entity_id": "string",
+    "message": "Campaign entity created successfully"
+    }
+```
+
+#### Example
+```json
+{
+    "id" : "account_test",
+    "first_name": "John",
+    "last_name": "Smith",
+    "phone_number": "3512443433",
+    "provided_state": "CA"
+}
+```
+
+
+### Error Responses
+
+
+**400 Bad Request - Validation Errors:**
+```json
+{
+  "error": "Validation failed",
+  "missing_fields": ["field1", "field2"],
+  "validation_errors": ["error1", "error2"]
+}
+```
+
+**400 Bad Request - Duplicate Entity:**
+```json
+{
+  "error": "The loan number servicer already exists in campaign"
+}
+```
+
+**400 Bad Request - Campaign Status:**
+```json
+{
+  "error": "Campaign is not in draft status"
+}
+```
+
+**401 Unauthorized:**
+```json
+{
+  "error": "Unauthorized"
+}
+```
+
+**404 Not Found - Campaign:**
+```json
+{
+  "error": "Campaign not found"
+}
+```
+
+**404 Not Found - Entity:**
+```json
+{
+  "error": "Outbound campaign entity not found"
+}
+```
+
+**500 Internal Server Error:**
+```json
+{
+  "error": "Failed to create campaign entity"
+}
+```
