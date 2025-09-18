@@ -1,0 +1,60 @@
+# Kastle AI - Figures Sales Salesforce Integration Documentation
+
+## Overview
+
+This document describes the integration between Kastle AI and Figure's Salesforce instance for submitting call disposition data after call completion.
+
+### Endpoint: 
+| Environment | URL |
+|------------|-----|
+| **Test** | `https://figure--kastle.sandbox.my.salesforce-sites.com/VoxAPI/services/apexrest/Kastle/v1/call-disposition` |
+| **Production** | `https://figure--kastle.my.salesforce-sites.com/VoxAPI/services/apexrest/Kastle/v1/call-disposition` |
+
+
+### Request Configuration
+
+- **HTTP Method:** `POST`
+- **Content-Type:** `application/json`
+- **Authentication:** API Key 
+
+#### Request Body
+
+```json
+    "call_disposition": string,
+    "task_id": string,
+    "transcript": string,
+    "account_id": string,
+    "call_duration": int
+```
+#### Field Validation Rules
+- **call_disposition**: string (see below for allowed values) 
+- **task_id**: unique identifier created by Kastle
+- **transcript**: transcript of the call
+- **account_id**: account id sent by Figure in the create entity endpoint,
+- **call_duration**: duration of the call in seconds 
+
+### Valid Call Dispositions
+- `DID_NOT_DIAL` - Invalid phone number
+- `NO_ANSWER` - No answer from borrower
+- `BUSY` - Line was busy
+- `DO_NOT_CALL` - Borrower requested not to be called
+- `APPOINTMENT_SCHEDULED` - Successfully scheduled appointment
+- `BORROWER_DECEASED` - Borrower is deceased
+- `LIVE_TRANSFERRED` - Live transfer to agent
+- `WARM_TRANSFERRED` - Warm transfer to agent
+- `MISSED_TRANSFER` - Transfer was missed
+- `CALL_CONNECTED` - Call was connected
+
+### Success response
+```
+{
+    "ok": boolean,
+    "message": "string",
+    "account_id": "string"
+}
+```
+
+
+
+
+
