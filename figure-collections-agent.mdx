@@ -18,7 +18,8 @@ The following is a list of data fields for the payment collections agent:
 | LastName                | Customer last name                                                                | String    |
 | DOB                     | Customer's date of birth, in YYYY-MM-DD format                                     | String    |
 | TaxIDLastFour           | Last four digits of customer's social security number                             | Number    |
-| LoanID                  | The unique identifier for the customer's loan, used for account lookup and verification | Number    |
+| LoanID                  | The unique identifier for the customer's loan, used for account lookup and verification | String    |
+| BorrowerID              | The unique identifier for the specific borrower within the loan, used for payment processing | String |
 | PhoneNumber             | Customer's phone number                                                           | Number    |
 | BorrowerEmail           | Customer's email address                                                          | String    |
 | PropertyAddress         | Customer's property address - street address                                      | String    |
@@ -61,7 +62,8 @@ See below for an example JSON schema of the datapoints above, with example data.
   "LastName": "Smith",
   "DOB": "1973-06-15",
   "TaxIDLastFour": 6394,
-  "LoanID": 1234567,
+  "LoanID": "1234567abc",
+  "BorrowerID": "56789xyz",
   "PhoneNumber": "+19876543210",
   "BorrowerEmail": "john@kastle.ai",
   "PropertyAddress": "123 Goodwin Street",
@@ -127,7 +129,8 @@ Note: This endpoint triggers an automated collection call to the specified borro
   "LastName": "string",
   "DOB": "YYYY-MM-DD",
   "TaxIDLastFour": "number",
-  "LoanID": "number",
+  "LoanID": "string",
+  "BorrowerID": "string",
   "PhoneNumber": "string",
   "BorrowerEmail": "string",
   "PropertyAddress": "string",
@@ -180,7 +183,8 @@ Note: This endpoint triggers an automated collection call to the specified borro
     "LastName": "string",
     "DOB": "YYYY-MM-DD",
     "TaxIDLastFour": "number",
-    "LoanID": "number",
+    "LoanID": "string",
+    "BorrowerID": "string",
     "PhoneNumber": "string",
     "BorrowerEmail": "string",
     "PropertyAddress": "string",
@@ -248,7 +252,8 @@ Following is an example of request body the agent should be able to send through
 
 | Field | Description | Data Type | Notes |
 |-------|-------------|-----------|--------|
-| `LoanID` | Borrower ID to attach payment to | String | Must match existing loan in system |
+| `LoanID` | Loan ID to attach payment to | String | Must match existing loan in system |
+| `BorrowerID` | Borrower ID to attach payment to | String | Must match existing loan and borrower in system |
 | `PaymentAmount` | Amount to be processed | Number | Must meet minimum payment |
 | `PaymentDate` | Date when payment will be processed | String | Current date or future (max 30 days) |
 | `AccountID` | Unique identifier for payment account | String | From borrower's available accounts |
@@ -259,6 +264,7 @@ Following is an example of request body the agent should be able to send through
 ```json
 {
   "LoanID": "string",
+  "BorrowerID: "string"
   "PaymentAmount": "number",
   "PaymentDate": "YYYY-MM-DD",
   "AccountID": "string",
@@ -282,6 +288,7 @@ This webhook is triggered after each collection call completes. It provides call
 |-------|-------------|-----------|--------|
 | `KastleCallID` | Unique identifier for this call session | String | Used for call tracking and retrieval |
 | `LoanID` | The loan ID for this borrower | String | From original trigger data |
+| `BorrowerID` | The borrower ID for this borrower | String | From original trigger data |
 | `BorrowerName` | Full name of the borrower contacted | String | Verified during call |
 | `CallTimestamp` | When the call was completed | Integer | Unix Timestamp (in seconds) |
 | `CallDurationSeconds` | Length of the call in seconds | Number | Total talk time |
@@ -305,6 +312,7 @@ This webhook is triggered after each collection call completes. It provides call
 {
   "KastleCallID": "string",
   "LoanID": "string",
+  "BorrowerID": "string",
   "BorrowerName": "string",
   "CallTimestamp": "YYYY-MM-DDTHH:MM:SSZ",
   "CallDurationSeconds": "number",
@@ -329,6 +337,111 @@ This webhook is triggered after each collection call completes. It provides call
   }
 }
 ```
+
+### 4. Stop Entity
+
+This endpoint allows you to immediately stop any pending or scheduled calls for a specific entity. Use this when a borrower has made a payment, requested to cease contact, or when you need to remove an entity from the active calling queue for any reason.
+
+**Endpoint:** `/figure-collections/{environment}/stop-entity/{entity_id}`  
+**Method:** POST  
+**Content-Type:** application/json  
+**Authentication:** JWT token required
+
+Note: 
+1. The entity_id is the unique identifier returned when the entity was first created through the trigger-call endpoint.
+2. If the same data is sent to the Kastle Call system using the same Loan Id, this will requeue the entity_id in the Kastle Call System.
+
+#### Path Parameters
+
+| Parameter | Description | Type | Required |
+|-----------|-------------|------|----------|
+| `environment` | Environment to use (`test` or `prod`) | String | Yes |
+| `entity_id` | Unique identifier of the entity to stop | String | Yes |
+
+#### Request Headers
+
+```
+Authorization: Bearer {JWT_TOKEN}
+Content-Type: application/json
+```
+
+#### Request Body (Optional)
+
+You can optionally provide a reason for stopping the entity:
+
+```json
+{
+  "reason": "string",
+  "reasonCode": "PAYMENT_MADE|CEASE_AND_DESIST|DO_NOT_CALL|DECEASED|WRONG_NUMBER|OTHER",
+  "notes": "string"
+}
+```
+
+#### Reason Codes
+
+| Code | Description |
+|------|-------------|
+| `PAYMENT_MADE` | Borrower has made a payment |
+| `CEASE_AND_DESIST` | Legal request to stop contact |
+| `DO_NOT_CALL` | Added to do-not-call list |
+| `DECEASED` | Borrower is deceased |
+| `WRONG_NUMBER` | Phone number is incorrect |
+| `OTHER` | Other reason (specify in notes) |
+
+#### Response
+
+**Success Response (200 OK):**
+```json
+{
+  "status": "success",
+  "message": "Entity successfully stopped",
+  "data": {
+    "entity_id": "string",
+    "loan_id": "string",
+    "borrower_id": "string",
+    "stopped_at": "YYYY-MM-DDTHH:MM:SSZ",
+    "reason": "string",
+    "reasonCode": "string",
+    "pending_calls_cancelled": "number"
+  }
+}
+```
+
+**Error Response (404 Not Found):**
+```json
+{
+  "status": "error",
+  "error": "Entity not found",
+  "details": "No active entity found with ID: {entity_id}"
+}
+```
+
+**Error Response (400 Bad Request):**
+```json
+{
+  "status": "error",
+  "error": "Invalid request",
+  "details": "Entity has already been stopped or completed"
+}
+```
+
+**Error Response (401 Unauthorized):**
+```json
+{
+  "status": "error",
+  "error": "Invalid or missing authentication token"
+}
+```
+
+#### Important Notes
+
+- Any scheduled or pending calls for this entity will be immediately cancelled
+- If the entity is currently in an active call, the call will complete but no further attempts will be made
+- This endpoint should be called immediately when any of the following occur:
+  - Payment is received through your payment system
+  - Legal cease and desist request is received
+  - Borrower is added to internal do-not-call list
+  - Account status changes that makes calling inappropriate
 
 
 ## Support and Integration
