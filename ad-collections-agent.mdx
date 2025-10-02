@@ -1,0 +1,453 @@
+# Kastle AI - Payment Collections Agent API Documentation
+
+## Overview
+
+This documentation outlines the API integration for Kastle AI's payment collections agent. The system processes borrower entities and makes automated outbound calls based on the data you provide.
+
+There are two types of APIs that will be made available:
+- **Test API Endpoints**: For testing and development with a pre-configured campaign
+- **Production Entity Management APIs**: For production campaigns with your own campaign IDs
+
+## Data Requirements
+
+The following is a list of data fields for the payment collections agent:
+
+| Field                   | Field Description                                                                 | Data Type |
+|--------------------------|-----------------------------------------------------------------------------------|-----------|
+| FirstName               | Customer first name                                                               | String    |
+| LastName                | Customer last name                                                                | String    |
+| DOB                     | Customer's date of birth, in YYYY-MM-DD format                                     | String    |
+| TaxIDLastFour           | Last four digits of customer's social security number                             | Number    |
+| LoanID                  | The unique identifier for the customer's loan, used for account lookup and verification | String    |
+| BorrowerID              | The unique identifier for the specific borrower within the loan, used for payment processing | String |
+| PhoneNumber             | Customer's phone number                                                           | Number    |
+| BorrowerEmail           | Customer's email address                                                          | String    |
+| PropertyAddress         | Customer's property address - street address                                      | String    |
+| PropertyCity            | Customer's property address - city                                                | String    |
+| PropertyState           | Customer's property address - state                                               | String    |
+| PropertyZip             | Customer's property address - ZIP code                                            | Number    |
+| MailingAddress          | Customer's mailing address - street address                                       | String    |
+| MailingCity             | Customer's mailing address - city                                                 | String    |
+| MailingState            | Customer's mailing address - state                                                | String    |
+| MailingZip              | Customer's mailing address - ZIP code                                             | Number    |
+| MonthlyPayment          | The regular monthly payment amount due.                                           | Number    |
+| TotalAmountDue          | The total amount currently due including principal, interest, escrow, and fees.   | Number    |
+| LateChargesBalance      | The amount of any late fees currently assessed on the account                     | Number    |
+| PrincipalBalance        | The current total balance of the account                                          | Number    |
+| PendingPmt              | Boolean indicator of whether there's a payment currently being processed but not yet posted | Boolean   |
+| HasAutomaticPayments    | Boolean indicator of whether the customer is enrolled in automatic payments       | Boolean   |
+| DaysLate                | The number of days the account is past due, if applicable.                        | Number    |
+| NextPaymentDueDate      | The date when the customer's next payment is due, in YYYY-MM-DD format            | String    |
+| Accounts      | An array of all available payment accounts with each entry having two keys "AccountId" and "AccountNumberLastFour" | Array[JSON]   |
+| LoanStatus              | The current status of the loan (e.g., CURRENT, DELINQUENT, LOSS_MITIGATION)       | String    |
+| LastContactDate         | The date when the borrower was last contacted                                     | String    |
+| Language                | Code indicating the customer's preferred language (en=English, es=Spanish)        | String    |
+| BorrowerDeceased        | Boolean indicator of whether the borrower is deceased                             | Boolean   |
+| EscrowBalance           | The current balance in the escrow account for taxes and insurance                 | Number    |
+| InterestRate            | The current interest rate applied to the account                                  | Number    |
+| LastPaymentHistory      | A brief summary of the last few transaction activity                              | String    |
+| LastPaymentDate         | The date when the most recent payment was received, in YYYY-MM-DD format          | String    |
+| SecondBorrowerFirstName | First name of co-borrower on account (if any)                                     | String    |
+| SecondBorrowerLastName  | Last name of co-borrower on account (if any)                                      | String    |
+| SecondBorrowerDOB       | Date of birth of co-borrower on account (if any)                                  | String    |
+| InsuranceInfo           | Insurance information for the loan account                                        | String    |
+
+### Example Data
+
+See below for an example JSON schema of the datapoints above, with example data.
+
+```json
+{
+  "FirstName": "John",
+  "LastName": "Smith",
+  "DOB": "1973-06-15",
+  "TaxIDLastFour": 6394,
+  "LoanID": "1234567abc",
+  "BorrowerID": "56789xyz",
+  "PhoneNumber": "+19876543210",
+  "BorrowerEmail": "john@kastle.ai",
+  "PropertyAddress": "123 Goodwin Street",
+  "PropertyCity": "San Francisco",
+  "PropertyState": "California",
+  "PropertyZip": 94103,
+  "MailingAddress": "123 Goodwin Street",
+  "MailingCity": "San Francisco",
+  "MailingState": "California",
+  "MailingZip": 94013,
+  "MonthlyPayment": 1250,
+  "TotalAmountDue": 1500,
+  "LateChargesBalance": 250,
+  "PrincipalBalance": 45000,
+  "PendingPmt": false,
+  "HasAutomaticPayments": false,
+  "DaysLate": 10,
+  "NextPaymentDueDate": "2025-09-28",
+  "Accounts":
+  [
+    {
+      "AccountId": "57bfcd39-cf7a-42e9-8934-ccfd95669868",
+      "AccountNumberLastFour": "1234"
+    },
+    {
+      "AccountId": "b8d0cb94-a46c-4ddf-9b31-e21415a7b3ba",
+      "AccountNumberLastFour": "5678"
+    }
+  ],
+  "LoanStatus": "Delinquent",
+  "LastContactDate": "2025-08-15",
+  "Language": "en",
+  "BorrowerDeceased": false,
+  "EscrowBalance": 0,
+  "InterestRate": 6.25,
+  "LastPaymentHistory": "TEXT: Paid Date: 2025-08-28| Pmt Amt: 1713.76| Trans Desc:ACH| Trans Note: TEXT: Paid Date: 2025-07-28| Pmt Amt: 1245.12| Trans Desc:Correction| Trans Note: None TEXT: Paid Date: 2025-06-29| Pmt Amt: 1675.89| Trans Desc:ACH| Trans Note: ",
+  "LastPaymentDate": "2025-08-28",
+  "SecondBorrowerFirstName": "Kelly",
+  "SecondBorrowerLastName": "Smith",
+  "SecondBorrowerDOB": "1975-06-16",
+  "InsuranceInfo": "Kastle Insurance Company"
+}
+```
+
+## API Endpoints
+
+Test and production API information for this implementation are TBD and will be provided upon engagement.
+
+### 1. Trigger Call Endpoint
+
+**Endpoint:** `/ad-mortgage/{environment}/trigger-call`  
+**Method:** POST  
+**Content-Type:** application/json  
+**Authentication:** JWT token required
+
+Note: This endpoint triggers an automated collection call to the specified borrower. JWT authentication is required with valid AD Mortgage organization credentials. The environment may be `test` or `prod`.
+
+#### Request Body
+
+```json
+{
+  "FirstName": "string",
+  "LastName": "string",
+  "DOB": "YYYY-MM-DD",
+  "TaxIDLastFour": "number",
+  "LoanID": "string",
+  "BorrowerID": "string",
+  "PhoneNumber": "string",
+  "BorrowerEmail": "string",
+  "PropertyAddress": "string",
+  "PropertyCity": "string",
+  "PropertyState": "string",
+  "PropertyZip": "number",
+  "MailingAddress": "string",
+  "MailingCity": "string",
+  "MailingState": "string",
+  "MailingZip": "number",
+  "MonthlyPayment": "number",
+  "TotalAmountDue": "number",
+  "LateChargesBalance": "number",
+  "PrincipalBalance": "number",
+  "PendingPmt": "boolean",
+  "HasAutomaticPayments": "boolean",
+  "DaysLate": "number",
+  "NextPaymentDueDate": "YYYY-MM-DD",
+  "Accounts": [
+    {
+      "AccountId": "string",
+      "AccountNumberLastFour": "string"
+    }
+  ],
+  "LoanStatus": "string",
+  "LastContactDate": "YYYY-MM-DD",
+  "Language": "en|es",
+  "BorrowerDeceased": "boolean",
+  "EscrowBalance": "number",
+  "InterestRate": "number",
+  "LastPaymentHistory": "string",
+  "LastPaymentDate": "YYYY-MM-DD",
+  "SecondBorrowerFirstName": "string",
+  "SecondBorrowerLastName": "string",
+  "SecondBorrowerDOB": "YYYY-MM-DD",
+  "InsuranceInfo": "string"
+}
+```
+
+#### Response
+
+**Success Response (200 OK):**
+```json
+{
+  "message": "Campaign entity created successfully",
+  "entity_id": "string",
+  "data": {
+    "id": "string",
+    "FirstName": "string",
+    "LastName": "string",
+    "DOB": "YYYY-MM-DD",
+    "TaxIDLastFour": "number",
+    "LoanID": "string",
+    "BorrowerID": "string",
+    "PhoneNumber": "string",
+    "BorrowerEmail": "string",
+    "PropertyAddress": "string",
+    "PropertyCity": "string",
+    "PropertyState": "string",
+    "PropertyZip": "number",
+    "MailingAddress": "string",
+    "MailingCity": "string",
+    "MailingState": "string",
+    "MailingZip": "number",
+    "MonthlyPayment": "number",
+    "TotalAmountDue": "number",
+    "LateChargesBalance": "number",
+    "PrincipalBalance": "number",
+    "PendingPmt": "boolean",
+    "HasAutomaticPayments": "boolean",
+    "DaysLate": "number",
+    "NextPaymentDueDate": "YYYY-MM-DD",
+    "Accounts": [
+      {
+        "AccountID": "string",
+        "AccountNumberLastFour": "string"
+      }
+    ],
+    "LoanStatus": "string",
+    "LastContactDate": "YYYY-MM-DD",
+    "Language": "en|es",
+    "BorrowerDeceased": "boolean",
+    "EscrowBalance": "number",
+    "InterestRate": "number",
+    "LastPaymentHistory": "string",
+    "LastPaymentDate": "YYYY-MM-DD",
+    "SecondBorrowerFirstName": "string",
+    "SecondBorrowerLastName": "string",
+    "SecondBorrowerDOB": "YYYY-MM-DD",
+    "InsuranceInfo": "string"
+  }
+}
+```
+
+**Error Response (400 Bad Request):**
+```json
+{
+  "status": "error",
+  "error": "Invalid request data",
+  "details": "string"
+}
+```
+
+**Error Response (401 Unauthorized):**
+```json
+{
+  "status": "error",
+  "error": "Invalid or missing authentication token"
+}
+```
+
+### 2. Process Payment API
+
+During a collection call, the agent needs access to a payment processing API it can interface with. The agent will only accept minimum payment amounts. Payments can be scheduled for the current date or up to 30 days in the future.
+
+Following is an example of request body the agent should be able to send through to the payment processing API.
+
+#### Field Descriptions
+
+| Field | Description | Data Type | Notes |
+|-------|-------------|-----------|--------|
+| `LoanID` | Loan ID to attach payment to | String | Must match existing loan in system |
+| `BorrowerID` | Borrower ID to attach payment to | String | Must match existing loan and borrower in system |
+| `PaymentAmount` | Amount to be processed | Number | Must meet minimum payment |
+| `PaymentDate` | Date when payment will be processed | String | Current date or future (max 30 days) |
+| `AccountID` | Unique identifier for payment account | String | From borrower's available accounts |
+| `AccountNumberLastFour` | Last 4 digits of account number | String | For verification and display |
+
+#### Request Body
+
+```json
+{
+  "LoanID": "string",
+  "BorrowerID: "string"
+  "PaymentAmount": "number",
+  "PaymentDate": "YYYY-MM-DD",
+  "AccountID": "string",
+  "AccountNumberLastFour": "string",
+}
+```
+
+#### Payment Processing Rules
+
+- **Minimum Payment**: Kastle system enforces minimum payment amount based on loan terms
+- **Future Dating**: Payments can be scheduled up to 30 days in advance
+
+
+### 3. Post Call Webhook
+
+This webhook is triggered after each collection call completes. It provides call outcome data and borrower responses to help you update your systems and determine next actions.
+
+#### Field Descriptions
+
+| Field | Description | Data Type | Notes |
+|-------|-------------|-----------|--------|
+| `KastleCallID` | Unique identifier for this call session | String | Used for call tracking and retrieval |
+| `LoanID` | The loan ID for this borrower | String | From original trigger data |
+| `BorrowerID` | The borrower ID for this borrower | String | From original trigger data |
+| `BorrowerName` | Full name of the borrower contacted | String | Verified during call |
+| `CallTimestamp` | When the call was completed | Integer | Unix Timestamp (in seconds) |
+| `CallDurationSeconds` | Length of the call in seconds | Number | Total talk time |
+| `PastDueAmountInformed` | Whether the past due amount was communicated | Boolean | True if amount was discussed |
+| `OccupancyStatus` | Current property occupancy status | Enum | Values: occupied, vacant, tenant, unknown |
+| `ReasonForDelinquency` | Why the borrower is delinquent | String/Null | Not asked if DaysLate < 15 (grace period) |
+| `PromiseToPay` | Payment commitment details | Object | Contains collected status, amount, and date |
+| `KastleCallSummary` | AI-generated summary of the call | String | Key points and outcomes |
+| `QRPCIndicator` | Qualified Right Party Contact indicator | Boolean | True if verified borrower was reached |
+| `CallOutcome` | Result of the call attempt | Enum | Connection status |
+| `BorrowerVerified` | Whether borrower identity was confirmed | Boolean | Based on verification questions |
+| `PaymentCollected` | Whether payment was processed during call | Boolean | True if payment successful |
+| `PaymentDetails` | Payment transaction information | Object | Only populated if payment collected |
+| `BorrowerDeceased` | Indicates if borrower is reported as deceased | Boolean | Compliance flag for account handling |
+| `CeaseAndDesist` | Borrower has requested to cease communication | Boolean | Legal compliance indicator |
+| `DoNotCall` | Borrower is on do-not-call list | Boolean | Regulatory compliance flag |
+
+#### Request Body
+
+```json
+{
+  "KastleCallID": "string",
+  "LoanID": "string",
+  "BorrowerID": "string",
+  "BorrowerName": "string",
+  "CallTimestamp": "YYYY-MM-DDTHH:MM:SSZ",
+  "CallDurationSeconds": "number",
+  "PastDueAmountInformed": "boolean",
+  "OccupancyStatus": "Occupied|Vacant|Tenant|Unknown",
+  "ReasonForDelinquency": "string|null",
+  "PromiseToPay": {
+    "Collected": "boolean",
+    "Amount": "number|null",
+    "Date": "YYYY-MM-DD|null"
+  },
+  "KastleCallSummary": "string",
+  "QRPCIndicator": "boolean",
+  "CallOutcome": "Connected|Voicemail|NoAnswer|Busy|Failed|DidNotDial",
+  "BorrowerVerified": "boolean",
+  "PaymentCollected": "boolean",
+  "PaymentDetails": {
+    "PaymentAmount": "number",
+    "PaymentDate": "YYYY-MM-DD",
+    "AccountID": "string",
+    "AccountNumberLastFour": "string",
+  }
+}
+```
+
+### 4. Stop Entity
+
+This endpoint allows you to immediately stop any pending or scheduled calls for a specific entity. Use this when a borrower has made a payment, requested to cease contact, or when you need to remove an entity from the active calling queue for any reason.
+
+**Endpoint:** `/ad-mortgage/{environment}/stop-entity/{entity_id}`  
+**Method:** POST  
+**Content-Type:** application/json  
+**Authentication:** JWT token required
+
+Note: 
+1. The entity_id is the unique identifier returned when the entity was first created through the trigger-call endpoint.
+2. If the same data is sent to the Kastle Call system using the same Loan Id, this will requeue the entity_id in the Kastle Call System.
+
+#### Path Parameters
+
+| Parameter | Description | Type | Required |
+|-----------|-------------|------|----------|
+| `environment` | Environment to use (`test` or `prod`) | String | Yes |
+| `entity_id` | Unique identifier of the entity to stop | String | Yes |
+
+#### Request Headers
+
+```
+Authorization: Bearer {JWT_TOKEN}
+Content-Type: application/json
+```
+
+#### Request Body (Optional)
+
+You can optionally provide a reason for stopping the entity:
+
+```json
+{
+  "reason": "string",
+  "reasonCode": "PAYMENT_MADE|CEASE_AND_DESIST|DO_NOT_CALL|DECEASED|WRONG_NUMBER|OTHER",
+  "notes": "string"
+}
+```
+
+#### Reason Codes
+
+| Code | Description |
+|------|-------------|
+| `PAYMENT_MADE` | Borrower has made a payment |
+| `CEASE_AND_DESIST` | Legal request to stop contact |
+| `DO_NOT_CALL` | Added to do-not-call list |
+| `DECEASED` | Borrower is deceased |
+| `WRONG_NUMBER` | Phone number is incorrect |
+| `OTHER` | Other reason (specify in notes) |
+
+#### Response
+
+**Success Response (200 OK):**
+```json
+{
+  "status": "success",
+  "message": "Entity successfully stopped",
+  "data": {
+    "entity_id": "string",
+    "loan_id": "string",
+    "borrower_id": "string",
+    "stopped_at": "YYYY-MM-DDTHH:MM:SSZ",
+    "reason": "string",
+    "reasonCode": "string",
+    "pending_calls_cancelled": "number"
+  }
+}
+```
+
+**Error Response (404 Not Found):**
+```json
+{
+  "status": "error",
+  "error": "Entity not found",
+  "details": "No active entity found with ID: {entity_id}"
+}
+```
+
+**Error Response (400 Bad Request):**
+```json
+{
+  "status": "error",
+  "error": "Invalid request",
+  "details": "Entity has already been stopped or completed"
+}
+```
+
+**Error Response (401 Unauthorized):**
+```json
+{
+  "status": "error",
+  "error": "Invalid or missing authentication token"
+}
+```
+
+#### Important Notes
+
+- Any scheduled or pending calls for this entity will be immediately cancelled
+- If the entity is currently in an active call, the call will complete but no further attempts will be made
+- This endpoint should be called immediately when any of the following occur:
+  - Payment is received through your payment system
+  - Legal cease and desist request is received
+  - Borrower is added to internal do-not-call list
+  - Account status changes that makes calling inappropriate
+
+
+## Support and Integration
+
+For questions, issues, or to set up your production integration:
+
+- **Technical Support**: Send us a message on our [Slack channel](https://join.slack.com/share/enQtODgxNTg1ODUyOTc3OC1iN2NhMmY3MzA4MDFmNzg1MjNjNWE1MGQ0ODI2MGM1ODM3YWRmYWI5YTY2NmNjOTdkMWZhYjllNjdmMmRkNjIz)
+- **Production Setup**: Contact us to configure your production campaign ID and webhook endpoints
+- **API Testing**: Use the test endpoints above (TBD) to validate your integration before going live
