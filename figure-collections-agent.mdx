@@ -290,6 +290,7 @@ This webhook is triggered after each collection call completes. It provides call
 | `LoanID` | The loan ID for this borrower | String | From original trigger data |
 | `BorrowerID` | The borrower ID for this borrower | String | From original trigger data |
 | `BorrowerName` | Full name of the borrower contacted | String | Verified during call |
+| `BorrowerType` | Type of borrower contacted | Enum | Values: Primary, Secondary |
 | `CallTimestamp` | When the call was completed | Integer | Unix Timestamp (in seconds) |
 | `CallDurationSeconds` | Length of the call in seconds | Number | Total talk time |
 | `PastDueAmountInformed` | Whether the past due amount was communicated | Boolean | True if amount was discussed |
@@ -314,6 +315,7 @@ This webhook is triggered after each collection call completes. It provides call
   "LoanID": "string",
   "BorrowerID": "string",
   "BorrowerName": "string",
+  "BorrowerType": "Primary|Secondary",
   "CallTimestamp": "YYYY-MM-DDTHH:MM:SSZ",
   "CallDurationSeconds": "number",
   "PastDueAmountInformed": "boolean",
@@ -326,7 +328,7 @@ This webhook is triggered after each collection call completes. It provides call
   },
   "KastleCallSummary": "string",
   "QRPCIndicator": "boolean",
-  "CallOutcome": "Connected|Voicemail|NoAnswer|Busy|Failed|DidNotDial",
+  "CallOutcome": "Connected|Voicemail|NoAnswer|Busy|Failed|DidNotDial|Transferred|Warm Transferred|Warm Transfer Failed",
   "BorrowerVerified": "boolean",
   "PaymentCollected": "boolean",
   "PaymentDetails": {
