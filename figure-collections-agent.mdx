@@ -307,6 +307,8 @@ This webhook is triggered after each collection call completes. It provides call
 | `BorrowerDeceased` | Indicates if borrower is reported as deceased | Boolean | | Compliance flag for account handling |
 | `CeaseAndDesist` | Borrower has requested to cease communication | Boolean | | Legal compliance indicator |
 | `DoNotCall` | Borrower is on do-not-call list | Boolean | | Regulatory compliance flag |
+| `AttorneyCommunicationRequested` | Borrower mentioned they are represented by an attorney | Boolean | | Used to change the person being contacted for Loan |
+| `AttorneyDetails` | Details of the Borrower's Attorney | Object | | Contains Attorney Name, Phone, Email. Null if AttorneyCommunicationRequested is false | 
 
 #### Request Body
 
@@ -338,10 +340,16 @@ This webhook is triggered after each collection call completes. It provides call
     "PaymentDate": "YYYY-MM-DD",
     "AccountID": "string",
     "AccountNumberLastFour": "string",
-  }
+  },
   "BorrowerDeceased": "boolean",
   "CeaseAndDesist": "boolean",
-  "DoNotCall": "boolean"
+  "DoNotCall": "boolean",
+  "AttorneyCommunicationRequested": "boolean",
+  "AttorneyDetails": {
+    "Name": "string",
+    "Phone": "string",
+    "Email": "string"
+  }
 }
 ```
 
@@ -373,7 +381,13 @@ This webhook is triggered after each collection call completes. It provides call
   "PaymentDetails": null,
   "BorrowerDeceased": false,
   "CeaseAndDesist": false,
-  "DoNotCall": false
+  "DoNotCall": false,
+  "AttorneyCommunicationRequested": true,
+  "AttorneyDetails": {
+    "Name": "Smith & Associates Law Firm",
+    "Phone": "555-123-4567",
+    "Email": "contact@smithlawfirm.com"
+  }
 }
 ```
 
