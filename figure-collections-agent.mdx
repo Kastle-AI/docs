@@ -264,7 +264,7 @@ Following is an example of request body the agent should be able to send through
 ```json
 {
   "LoanID": "string",
-  "BorrowerID: "string",
+  "BorrowerID": "string",
   "PaymentAmount": "number",
   "PaymentDate": "YYYY-MM-DD",
   "AccountID": "string",
@@ -330,7 +330,7 @@ This webhook is triggered after each collection call completes. It provides call
   "KastleCallSummary": "string",
   "QRPCIndicator": "boolean",
   "CallOutcome": "Connected|Voicemail|NoAnswer|Busy|Failed|DidNotDial|Transferred|Warm Transferred|Warm Transfer Failed",
-  "RPC": boolean
+  "RPC": "boolean",
   "BorrowerVerified": "boolean",
   "PaymentCollected": "boolean",
   "PaymentDetails": {
