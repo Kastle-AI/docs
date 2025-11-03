@@ -315,7 +315,11 @@ This webhook is triggered after each collection call completes. It provides call
 | `CeaseAndDesist` | Borrower has requested to cease communication | Boolean | | Legal compliance indicator |
 | `DoNotCall` | Borrower is on do-not-call list | Boolean | | Regulatory compliance flag |
 | `AttorneyCommunicationRequested` | Borrower mentioned they are represented by an attorney | Boolean | | Used to change the person being contacted for Loan |
+<<<<<<< HEAD
 | `AttorneyDetails` | Details of the Borrower's Attorney | Object/Null | | Contains Name, Phone, Email. Null if AttorneyCommunicationRequested is false | 
+=======
+| `AttorneyDetails` | Details of the Borrower's Attorney | Object | | Contains Attorney Name, Phone, Email. Null if AttorneyCommunicationRequested is false | 
+>>>>>>> 9e3858a (Pg/collections docs update1 (#25))
 
 #### Request Body
 
@@ -345,7 +349,12 @@ This webhook is triggered after each collection call completes. It provides call
   "PaymentDetails": {
     "PaymentAmount": "number",
     "PaymentDate": "YYYY-MM-DD",
+<<<<<<< HEAD
     "AccountID": "string"
+=======
+    "AccountID": "string",
+    "AccountNumberLastFour": "string",
+>>>>>>> 9e3858a (Pg/collections docs update1 (#25))
   },
   "BorrowerDeceased": "boolean",
   "CeaseAndDesist": "boolean",
