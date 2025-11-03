@@ -12,45 +12,45 @@ There are two types of APIs that will be made available:
 
 The following is a list of data fields for the payment collections agent:
 
-| Field                   | Field Description                                                                 | Data Type |
-|--------------------------|-----------------------------------------------------------------------------------|-----------|
-| FirstName               | Customer first name                                                               | String    |
-| LastName                | Customer last name                                                                | String    |
-| DOB                     | Customer's date of birth, in YYYY-MM-DD format                                     | String    |
-| TaxIDLastFour           | Last four digits of customer's social security number (exactly 4 digits)          | Number    |
-| LoanID                  | The unique identifier for the customer's loan, used for account lookup and verification | String    |
-| BorrowerID              | The unique identifier for the specific borrower within the loan, used for payment processing | String |
-| PhoneNumber             | Customer's phone number in E.164 format (e.g., +19876543210)                      | String    |
-| BorrowerEmail           | Customer's email address                                                          | String    |
-| PropertyAddress         | Customer's property address - street address                                      | String    |
-| PropertyCity            | Customer's property address - city                                                | String    |
-| PropertyState           | Customer's property address - state                                               | String    |
-| PropertyZip             | Customer's property address - ZIP code (exactly 5 digits)                         | Number    |
-| MailingAddress          | Customer's mailing address - street address                                       | String    |
-| MailingCity             | Customer's mailing address - city                                                 | String    |
-| MailingState            | Customer's mailing address - state                                                | String    |
-| MailingZip              | Customer's mailing address - ZIP code (exactly 5 digits)                          | Number    |
-| MonthlyPayment          | The regular monthly payment amount due.                                           | Number    |
-| TotalAmountDue          | The total amount currently due including principal, interest, escrow, and fees.   | Number    |
-| LateChargesBalance      | The amount of any late fees currently assessed on the account                     | Number    |
-| PrincipalBalance        | The current total balance of the account                                          | Number    |
-| PendingPmt              | Boolean indicator of whether there's a payment currently being processed but not yet posted | Boolean   |
-| HasAutomaticPayments    | Boolean indicator of whether the customer is enrolled in automatic payments       | Boolean   |
-| DaysLate                | The number of days the account is past due, if applicable.                        | Number    |
-| NextPaymentDueDate      | The date when the customer's next payment is due, in YYYY-MM-DD format            | String    |
-| Accounts      | An array of all available payment accounts with each entry having two keys "AccountId" and "AccountNumberLastFour" | Array[JSON]   |
-| LoanStatus              | The current status of the loan (e.g., CURRENT, DELINQUENT, LOSS_MITIGATION)       | String    |
-| LastContactDate         | The date when the borrower was last contacted                                     | String    |
-| Language                | Code indicating the customer's preferred language (currently only "en" supported) | String    |
-| BorrowerDeceased        | Boolean indicator of whether the borrower is deceased                             | Boolean   |
-| EscrowBalance           | The current balance in the escrow account for taxes and insurance                 | Number    |
-| InterestRate            | The current interest rate applied to the account                                  | Number    |
-| LastPaymentHistory      | A brief summary of the last few transaction activity                              | String    |
-| LastPaymentDate         | The date when the most recent payment was received, in YYYY-MM-DD format          | String    |
-| SecondBorrowerFirstName | First name of co-borrower on account (if any)                                     | String    |
-| SecondBorrowerLastName  | Last name of co-borrower on account (if any)                                      | String    |
-| SecondBorrowerDOB       | Date of birth of co-borrower on account (if any)                                  | String    |
-| InsuranceInfo           | Insurance information for the loan account                                        | String    |
+| Field                   | Field Description                                                                 | Data Type | Required |
+|--------------------------|-----------------------------------------------------------------------------------|-----------|----------|
+| FirstName               | Customer first name                                                               | String    | Yes      |
+| LastName                | Customer last name                                                                | String    | Yes      |
+| DOB                     | Customer's date of birth, in YYYY-MM-DD format                                     | String    | Yes      |
+| TaxIDLastFour           | Last four digits of customer's social security number (exactly 4 digits)          | Number    | No       |
+| LoanID                  | The unique identifier for the customer's loan, used for account lookup and verification | String    | Yes      |
+| BorrowerID              | The unique identifier for the specific borrower within the loan, used for payment processing | String | Yes |
+| PhoneNumber             | Customer's phone number in E.164 format (e.g., +19876543210)                      | String    | Yes      |
+| BorrowerEmail           | Customer's email address                                                          | String    | Yes      |
+| PropertyAddress         | Customer's property address - street address                                      | String    | Yes      |
+| PropertyCity            | Customer's property address - city                                                | String    | Yes      |
+| PropertyState           | Customer's property address - state                                               | String    | Yes      |
+| PropertyZip             | Customer's property address - ZIP code (exactly 5 digits)                         | Number    | Yes      |
+| MailingAddress          | Customer's mailing address - street address                                       | String    | Yes      |
+| MailingCity             | Customer's mailing address - city                                                 | String    | Yes      |
+| MailingState            | Customer's mailing address - state                                                | String    | Yes      |
+| MailingZip              | Customer's mailing address - ZIP code (exactly 5 digits)                          | Number    | Yes      |
+| MonthlyPayment          | The regular monthly payment amount due.                                           | Number    | Yes      |
+| TotalAmountDue          | The total amount currently due including principal, interest, escrow, and fees.   | Number    | Yes      |
+| LateChargesBalance      | The amount of any late fees currently assessed on the account                     | Number    | Yes      |
+| PrincipalBalance        | The current total balance of the account                                          | Number    | Yes      |
+| PendingPmt              | Boolean indicator of whether there's a payment currently being processed but not yet posted | Boolean   | Yes      |
+| HasAutomaticPayments    | Boolean indicator of whether the customer is enrolled in automatic payments       | Boolean   | Yes      |
+| DaysLate                | The number of days the account is past due, if applicable.                        | Number    | Yes      |
+| NextPaymentDueDate      | The date when the customer's next payment is due, in YYYY-MM-DD format            | String    | Yes      |
+| Accounts      | An array of all available payment accounts with each entry having two keys "AccountId" and "AccountNumberLastFour" | Array[JSON]   | Yes      |
+| LoanStatus              | The current status of the loan (e.g., CURRENT, DELINQUENT, LOSS_MITIGATION)       | String    | Yes      |
+| LastContactDate         | The date when the borrower was last contacted, in YYYY-MM-DD format               | String    | No       |
+| Language                | Code indicating the customer's preferred language (currently only "en" supported) | String    | Yes      |
+| BorrowerDeceased        | Boolean indicator of whether the borrower is deceased                             | Boolean   | Yes      |
+| EscrowBalance           | The current balance in the escrow account for taxes and insurance                 | Number    | Yes      |
+| InterestRate            | The current interest rate applied to the account                                  | Number    | Yes      |
+| LastPaymentHistory      | A brief summary of the last few transaction activity                              | String    | Yes      |
+| LastPaymentDate         | The date when the most recent payment was received, in YYYY-MM-DD format          | String    | Yes      |
+| SecondBorrowerFirstName | First name of co-borrower on account (if any)                                     | String    | No       |
+| SecondBorrowerLastName  | Last name of co-borrower on account (if any)                                      | String    | No       |
+| SecondBorrowerDOB       | Date of birth of co-borrower on account (if any), in YYYY-MM-DD format           | String    | No       |
+| InsuranceInfo           | Insurance information for the loan account                                        | String    | Yes      |
 
 ### Example Data
 
@@ -124,12 +124,14 @@ Note: This endpoint triggers an automated collection call to the specified borro
 
 #### Request Body
 
+All fields are required unless marked as optional.
+
 ```json
 {
   "FirstName": "string",
   "LastName": "string",
   "DOB": "YYYY-MM-DD",
-  "TaxIDLastFour": "number",
+  "TaxIDLastFour": "number (optional)",
   "LoanID": "string",
   "BorrowerID": "string",
   "PhoneNumber": "string",
@@ -153,23 +155,40 @@ Note: This endpoint triggers an automated collection call to the specified borro
   "Accounts": [
     {
       "AccountId": "string",
-      "AccountNumberLastFour": "string"
+      "AccountNumberLastFour": "string (exactly 4 characters)"
     }
   ],
   "LoanStatus": "string",
-  "LastContactDate": "YYYY-MM-DD",
+  "LastContactDate": "YYYY-MM-DD (optional)",
   "Language": "en",
   "BorrowerDeceased": "boolean",
   "EscrowBalance": "number",
   "InterestRate": "number",
   "LastPaymentHistory": "string",
   "LastPaymentDate": "YYYY-MM-DD",
-  "SecondBorrowerFirstName": "string",
-  "SecondBorrowerLastName": "string",
-  "SecondBorrowerDOB": "YYYY-MM-DD",
+  "SecondBorrowerFirstName": "string (optional)",
+  "SecondBorrowerLastName": "string (optional)",
+  "SecondBorrowerDOB": "YYYY-MM-DD (optional)",
   "InsuranceInfo": "string"
 }
 ```
+
+#### Validation Rules
+
+- **PhoneNumber**: Must be in E.164 format (e.g., +19876543210) for US, CA, or PR
+- **DOB, NextPaymentDueDate, LastPaymentDate**: Must be in YYYY-MM-DD format
+- **LastContactDate, SecondBorrowerDOB**: Must be in YYYY-MM-DD format if provided
+- **PropertyZip, MailingZip**: Must be exactly 5 digits
+- **TaxIDLastFour**: Must be exactly 4 digits if provided
+- **MonthlyPayment, TotalAmountDue, LateChargesBalance, PrincipalBalance, EscrowBalance**: Must be zero or positive numbers
+- **InterestRate**: Must be between 0 and 100
+- **DaysLate**: Must be zero or positive
+- **Language**: Currently only "en" is supported
+- **Accounts**: Must be a non-empty array. Each account must have:
+  - `AccountId`: Non-empty string
+  - `AccountNumberLastFour`: Exactly 4 characters
+- **String fields**: Cannot be empty (except optional fields)
+- **Optional fields**: If not provided, will be set to "N/A" or appropriate defaults
 
 #### Response
 
@@ -183,7 +202,7 @@ Note: This endpoint triggers an automated collection call to the specified borro
     "FirstName": "string",
     "LastName": "string",
     "DOB": "YYYY-MM-DD",
-    "TaxIDLastFour": "number",
+    "TaxIDLastFour": "string",
     "LoanID": "string",
     "BorrowerID": "string",
     "PhoneNumber": "string",
@@ -191,40 +210,48 @@ Note: This endpoint triggers an automated collection call to the specified borro
     "PropertyAddress": "string",
     "PropertyCity": "string",
     "PropertyState": "string",
-    "PropertyZip": "number",
+    "PropertyZip": "string",
     "MailingAddress": "string",
     "MailingCity": "string",
     "MailingState": "string",
-    "MailingZip": "number",
-    "MonthlyPayment": "number",
-    "TotalAmountDue": "number",
-    "LateChargesBalance": "number",
-    "PrincipalBalance": "number",
-    "PendingPmt": "boolean",
-    "HasAutomaticPayments": "boolean",
+    "MailingZip": "string",
+    "MonthlyPayment": "string",
+    "MonthlyPaymentNumbers": "number",
+    "TotalAmountDue": "string",
+    "TotalAmountDueNumbers": "number",
+    "LateChargesBalance": "string",
+    "PrincipalBalance": "string",
+    "PendingPmt": "string",
+    "HasAutomaticPayments": "string",
     "DaysLate": "number",
     "NextPaymentDueDate": "YYYY-MM-DD",
-    "Accounts": [
-      {
-        "AccountID": "string",
-        "AccountNumberLastFour": "string"
-      }
-    ],
+    "Accounts": "string",
     "LoanStatus": "string",
-    "LastContactDate": "YYYY-MM-DD",
+    "LastContactDate": "string",
     "Language": "en",
-    "BorrowerDeceased": "boolean",
-    "EscrowBalance": "number",
-    "InterestRate": "number",
+    "BorrowerDeceased": "string",
+    "EscrowBalance": "string",
+    "InterestRate": "string",
     "LastPaymentHistory": "string",
     "LastPaymentDate": "YYYY-MM-DD",
     "SecondBorrowerFirstName": "string",
     "SecondBorrowerLastName": "string",
-    "SecondBorrowerDOB": "YYYY-MM-DD",
-    "InsuranceInfo": "string"
+    "SecondBorrowerDOB": "string",
+    "InsuranceInfo": "string",
+    "30DaysOut": "YYYY-MM-DD",
+    "days_late_gt_15": "string",
+    "days_late_leq_15": "string",
+    "FigureUserBankAccountsList": "string",
+    "RandomlySelectedAccountLastFour": "string",
+    "transaction_history": "string"
   }
 }
 ```
+
+**Note**: The response data includes both the original fields (processed for the agent) and computed fields:
+- Monetary amounts are converted to words (e.g., `MonthlyPayment`) with original numbers preserved (e.g., `MonthlyPaymentNumbers`)
+- Boolean values are formatted as strings (e.g., "(true)" or "(false)")
+- Computed fields include `30DaysOut`, `days_late_gt_15`, `days_late_leq_15`, etc.
 
 **Error Response (400 Bad Request):**
 ```json
