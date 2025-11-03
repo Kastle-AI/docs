@@ -17,19 +17,19 @@ The following is a list of data fields for the payment collections agent:
 | FirstName               | Customer first name                                                               | String    |
 | LastName                | Customer last name                                                                | String    |
 | DOB                     | Customer's date of birth, in YYYY-MM-DD format                                     | String    |
-| TaxIDLastFour           | Last four digits of customer's social security number                             | Number    |
+| TaxIDLastFour           | Last four digits of customer's social security number (exactly 4 digits)          | Number    |
 | LoanID                  | The unique identifier for the customer's loan, used for account lookup and verification | String    |
 | BorrowerID              | The unique identifier for the specific borrower within the loan, used for payment processing | String |
-| PhoneNumber             | Customer's phone number                                                           | Number    |
+| PhoneNumber             | Customer's phone number in E.164 format (e.g., +19876543210)                      | String    |
 | BorrowerEmail           | Customer's email address                                                          | String    |
 | PropertyAddress         | Customer's property address - street address                                      | String    |
 | PropertyCity            | Customer's property address - city                                                | String    |
 | PropertyState           | Customer's property address - state                                               | String    |
-| PropertyZip             | Customer's property address - ZIP code                                            | Number    |
+| PropertyZip             | Customer's property address - ZIP code (exactly 5 digits)                         | Number    |
 | MailingAddress          | Customer's mailing address - street address                                       | String    |
 | MailingCity             | Customer's mailing address - city                                                 | String    |
 | MailingState            | Customer's mailing address - state                                                | String    |
-| MailingZip              | Customer's mailing address - ZIP code                                             | Number    |
+| MailingZip              | Customer's mailing address - ZIP code (exactly 5 digits)                          | Number    |
 | MonthlyPayment          | The regular monthly payment amount due.                                           | Number    |
 | TotalAmountDue          | The total amount currently due including principal, interest, escrow, and fees.   | Number    |
 | LateChargesBalance      | The amount of any late fees currently assessed on the account                     | Number    |
@@ -41,7 +41,7 @@ The following is a list of data fields for the payment collections agent:
 | Accounts      | An array of all available payment accounts with each entry having two keys "AccountId" and "AccountNumberLastFour" | Array[JSON]   |
 | LoanStatus              | The current status of the loan (e.g., CURRENT, DELINQUENT, LOSS_MITIGATION)       | String    |
 | LastContactDate         | The date when the borrower was last contacted                                     | String    |
-| Language                | Code indicating the customer's preferred language (en=English, es=Spanish)        | String    |
+| Language                | Code indicating the customer's preferred language (currently only "en" supported) | String    |
 | BorrowerDeceased        | Boolean indicator of whether the borrower is deceased                             | Boolean   |
 | EscrowBalance           | The current balance in the escrow account for taxes and insurance                 | Number    |
 | InterestRate            | The current interest rate applied to the account                                  | Number    |
@@ -110,16 +110,17 @@ See below for an example JSON schema of the datapoints above, with example data.
 
 ## API Endpoints
 
-Test and production API information for this implementation are TBD and will be provided upon engagement.
-
 ### 1. Trigger Call Endpoint
 
 **Endpoint:** `/figure-collections/{environment}/trigger-call`  
 **Method:** POST  
 **Content-Type:** application/json  
-**Authentication:** JWT token required
+**Authentication:** JWT token required (Bearer token in Authorization header)
 
-Note: This endpoint triggers an automated collection call to the specified borrower. JWT authentication is required with valid Figure Collections organization credentials. The environment may be `test` or `prod`.
+**Path Parameters:**
+- `environment`: Environment to use (`test` or `prod`)
+
+Note: This endpoint triggers an automated collection call to the specified borrower. JWT authentication is required with valid Figure Collections organization credentials.
 
 #### Request Body
 
@@ -157,7 +158,7 @@ Note: This endpoint triggers an automated collection call to the specified borro
   ],
   "LoanStatus": "string",
   "LastContactDate": "YYYY-MM-DD",
-  "Language": "en|es",
+  "Language": "en",
   "BorrowerDeceased": "boolean",
   "EscrowBalance": "number",
   "InterestRate": "number",
@@ -211,7 +212,7 @@ Note: This endpoint triggers an automated collection call to the specified borro
     ],
     "LoanStatus": "string",
     "LastContactDate": "YYYY-MM-DD",
-    "Language": "en|es",
+    "Language": "en",
     "BorrowerDeceased": "boolean",
     "EscrowBalance": "number",
     "InterestRate": "number",
@@ -228,17 +229,23 @@ Note: This endpoint triggers an automated collection call to the specified borro
 **Error Response (400 Bad Request):**
 ```json
 {
-  "status": "error",
-  "error": "Invalid request data",
-  "details": "string"
+  "error": "Validation failed",
+  "missing_fields": ["string"],
+  "validation_errors": ["string"]
 }
 ```
 
 **Error Response (401 Unauthorized):**
 ```json
 {
-  "status": "error",
-  "error": "Invalid or missing authentication token"
+  "error": "Unauthorized"
+}
+```
+
+**Error Response (404 Not Found):**
+```json
+{
+  "error": "Campaign not found"
 }
 ```
 
@@ -286,29 +293,29 @@ This webhook is triggered after each collection call completes. It provides call
 
 | Field | Description | Data Type | PII | Notes |
 |-------|-------------|-----------|-----|--------|
-| `KastleCallID` | Unique identifier for this call session | String | | Used for call tracking and retrieval |
+| `KastleCallID` | Unique identifier for this call session | String | | Used for call tracking and retrieval. Will be "NA" if no call was made |
 | `LoanID` | The loan ID for this borrower | String | | From original trigger data |
 | `BorrowerID` | The borrower ID for this borrower | String | | From original trigger data |
-| `BorrowerName` | Full name of the borrower contacted | String | ⚠️ | Verified during call |
-| `BorrowerType` | Type of borrower contacted | Enum | | Allowed values: `Primary`, `Secondary` |
-| `CallTimestamp` | When the call was completed | Integer | | Unix Timestamp (in seconds) |
-| `CallDurationSeconds` | Length of the call in seconds | Number | | Total talk time |
+| `BorrowerName` | Full name of the borrower contacted | String | ⚠️ | Concatenation of FirstName and LastName from trigger data |
+| `BorrowerType` | Type of borrower contacted | Enum | | Allowed values: `Primary`, `Secondary`, `NA` |
+| `CallTimestamp` | When the call was completed | String | | ISO 8601 format (YYYY-MM-DDTHH:MM:SSZ). Will be "NA" if no call was made |
+| `CallDurationSeconds` | Length of the call in seconds | Number | | Total talk time. Will be 0 if no call was made |
 | `PastDueAmountInformed` | Whether the past due amount was communicated | Boolean | | True if amount was discussed |
 | `OccupancyStatus` | Current property occupancy status | Enum | | Allowed values: `Occupied`, `Vacant`, `Tenant`, `Unknown` |
-| `ReasonForDelinquency` | Why the borrower is delinquent | String/Null |  | Not asked if DaysLate < 15 (grace period) |
-| `PromiseToPay` | Payment commitment details | Object | | Contains collected status, amount, and date |
-| `KastleCallSummary` | AI-generated summary of the call | String |  | Key points and outcomes |
+| `ReasonForDelinquency` | Why the borrower is delinquent | String/Null |  | Currently not implemented (set to null) |
+| `PromiseToPay` | Payment commitment details | Object | | Contains Collected (boolean), Amount (number or "N/A"), and Date (YYYY-MM-DD or "N/A") |
+| `KastleCallSummary` | AI-generated summary of the call | String |  | Key points and outcomes. If call was suppressed or not made, contains reason |
 | `QRPCIndicator` | Qualified Right Party Contact indicator | Boolean | | True if verified borrower was reached |
-| `CallOutcome` | Result of the call attempt | Enum | | Allowed values: `Connected`, `Voicemail`, `NoAnswer`, `Busy`, `Failed`, `DidNotDial`, `Transferred`, `Warm Transferred`, `Warm Transfer Failed` |
-| `RPC`| Whether the borrower confirmed their name | Boolean | | Based on BorrowerName (or SecondaryBorrowerName)
-| `BorrowerVerified` | Whether borrower identity was confirmed | Boolean | | Based on verification questions |
+| `CallOutcome` | Result of the call attempt | Enum | | Allowed values: `Connected`, `Voicemail`, `No Answer`, `Busy`, `Failed`, `Did Not Dial`, `Transferred`, `Warm Transferred`, `In Progress` |
+| `RPC`| Whether the borrower confirmed their name | Boolean | | Right Party Contact indicator |
+| `BorrowerVerified` | Whether borrower identity was confirmed | Boolean | | Based on DOB verification |
 | `PaymentCollected` | Whether payment was processed during call | Boolean | | True if payment successful |
-| `PaymentDetails` | Payment transaction information | Object | ⚠️ | Only populated if payment collected |
+| `PaymentDetails` | Payment transaction information | Object/Null | ⚠️ | Only populated if payment collected. Contains PaymentAmount, PaymentDate, and AccountID |
 | `BorrowerDeceased` | Indicates if borrower is reported as deceased | Boolean | | Compliance flag for account handling |
 | `CeaseAndDesist` | Borrower has requested to cease communication | Boolean | | Legal compliance indicator |
 | `DoNotCall` | Borrower is on do-not-call list | Boolean | | Regulatory compliance flag |
 | `AttorneyCommunicationRequested` | Borrower mentioned they are represented by an attorney | Boolean | | Used to change the person being contacted for Loan |
-| `AttorneyDetails` | Details of the Borrower's Attorney | Object | | Contains Attorney Name, Phone, Email. Null if AttorneyCommunicationRequested is false | 
+| `AttorneyDetails` | Details of the Borrower's Attorney | Object/Null | | Contains Name, Phone, Email. Null if AttorneyCommunicationRequested is false | 
 
 #### Request Body
 
@@ -338,8 +345,7 @@ This webhook is triggered after each collection call completes. It provides call
   "PaymentDetails": {
     "PaymentAmount": "number",
     "PaymentDate": "YYYY-MM-DD",
-    "AccountID": "string",
-    "AccountNumberLastFour": "string",
+    "AccountID": "string"
   },
   "BorrowerDeceased": "boolean",
   "CeaseAndDesist": "boolean",
@@ -362,7 +368,7 @@ This webhook is triggered after each collection call completes. It provides call
   "BorrowerID": "BRW-567890",
   "BorrowerName": "John Smith",
   "BorrowerType": "Primary",
-  "CallTimestamp": 1730217600,
+  "CallTimestamp": "2024-10-29T16:00:00Z",
   "CallDurationSeconds": 245,
   "PastDueAmountInformed": true,
   "OccupancyStatus": "Occupied",
@@ -398,7 +404,7 @@ This endpoint allows you to immediately stop any pending or scheduled calls for 
 **Endpoint:** `/figure-collections/{environment}/stop-entity/{entity_id}`  
 **Method:** POST  
 **Content-Type:** application/json  
-**Authentication:** JWT token required
+**Authentication:** JWT token required (Bearer token in Authorization header)
 
 Note: 
 1. The entity_id is the unique identifier returned when the entity was first created through the trigger-call endpoint.
@@ -495,11 +501,135 @@ You can optionally provide a reason for stopping the entity:
   - Borrower is added to internal do-not-call list
   - Account status changes that makes calling inappropriate
 
+### 5. Get Webhook Data
+
+This endpoint allows you to retrieve historical webhook data that was sent to your system for a specific time range. This is useful for debugging, reconciliation, or recovering missed webhook notifications.
+
+**Endpoint:** `/figure-collections/{environment}/get-webhook-data`  
+**Method:** POST  
+**Content-Type:** application/json  
+**Authentication:** JWT token required (Bearer token in Authorization header)
+
+**Path Parameters:**
+- `environment`: Environment to use (`test` or `prod`)
+
+Note: This endpoint retrieves webhook payloads that were previously sent to your webhook endpoint. The time range cannot exceed 7 days.
+
+#### Request Body
+
+```json
+{
+  "start_timestamp": "integer",
+  "end_timestamp": "integer"
+}
+```
+
+| Field | Description | Data Type | Required | Notes |
+|-------|-------------|-----------|----------|-------|
+| `start_timestamp` | Start of time range | Integer | Yes | Unix timestamp in seconds |
+| `end_timestamp` | End of time range | Integer | Yes | Unix timestamp in seconds |
+
+**Constraints:**
+- Both timestamps must be integers (Unix timestamps in seconds)
+- Time range cannot exceed 7 days (604800 seconds)
+- End timestamp must be greater than or equal to start timestamp
+
+#### Response
+
+**Success Response (200 OK):**
+```json
+{
+  "status": "success",
+  "message": "Webhook data retrieved successfully",
+  "data": [
+    {
+      "KastleCallID": "string",
+      "LoanID": "string",
+      "BorrowerID": "string",
+      "BorrowerName": "string",
+      "BorrowerType": "Primary|Secondary|NA",
+      "CallTimestamp": "YYYY-MM-DDTHH:MM:SSZ",
+      "CallDurationSeconds": "number",
+      "PastDueAmountInformed": "boolean",
+      "OccupancyStatus": "Occupied|Vacant|Tenant|Unknown",
+      "ReasonForDelinquency": "string|null",
+      "PromiseToPay": {
+        "Collected": "boolean",
+        "Amount": "number|string",
+        "Date": "YYYY-MM-DD|string"
+      },
+      "KastleCallSummary": "string",
+      "QRPCIndicator": "boolean",
+      "CallOutcome": "string",
+      "RPC": "boolean",
+      "BorrowerVerified": "boolean",
+      "PaymentCollected": "boolean",
+      "PaymentDetails": {
+        "PaymentAmount": "number",
+        "PaymentDate": "YYYY-MM-DD",
+        "AccountID": "string"
+      },
+      "BorrowerDeceased": "boolean",
+      "CeaseAndDesist": "boolean",
+      "DoNotCall": "boolean",
+      "AttorneyCommunicationRequested": "boolean",
+      "AttorneyDetails": {
+        "Name": "string",
+        "Phone": "string",
+        "Email": "string"
+      }
+    }
+  ]
+}
+```
+
+**Error Response (400 Bad Request):**
+```json
+{
+  "error": "Start and end timestamps are required"
+}
+```
+```json
+{
+  "error": "Start and end timestamps must be integers"
+}
+```
+```json
+{
+  "error": "Time range cannot exceed 7 days"
+}
+```
+
+**Error Response (401 Unauthorized):**
+```json
+{
+  "error": "Unauthorized"
+}
+```
+
+**Error Response (404 Not Found):**
+```json
+{
+  "error": "No webhook data found"
+}
+```
+
+#### Example Request
+
+```json
+{
+  "start_timestamp": 1730217600,
+  "end_timestamp": 1730304000
+}
+```
+
+This retrieves all webhook data sent between October 29, 2024 and October 30, 2024.
+
 
 ## Support and Integration
 
 For questions, issues, or to set up your production integration:
 
 - **Technical Support**: Send us a message on our [Slack channel](https://join.slack.com/share/enQtODgxNTg1ODUyOTc3OC1iN2NhMmY3MzA4MDFmNzg1MjNjNWE1MGQ0ODI2MGM1ODM3YWRmYWI5YTY2NmNjOTdkMWZhYjllNjdmMmRkNjIz)
-- **Production Setup**: Contact us to configure your production campaign ID and webhook endpoints
-- **API Testing**: Use the test endpoints above (TBD) to validate your integration before going live
+- **Production Setup**: Contact us to configure your production campaign ID and webhook endpoints  
+- **API Testing**: Use the test environment to validate your integration before going live with production
