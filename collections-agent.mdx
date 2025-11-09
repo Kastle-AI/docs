@@ -66,18 +66,38 @@ The following is a comprehensive list of data fields that can be configured for 
 | AccountStatus           | The current status of the account (e.g., CURRENT, DELINQUENT, COLLECTIONS)        | String    |
 | LastContactDate         | The date when the customer was last contacted                                     | String    |
 | CustomerFlags           | Any special handling flags (e.g., DO_NOT_CALL, DECEASED, VIP)                    | Array[String] |
-| PaymentHistory          | A brief summary of recent transaction activity                                    | String    |
+| PaymentHistory          | An array of recent transaction activity                                           | Array[JSON] |
+
+#### Payment History Object Structure
+
+Each payment history object in the `PaymentHistory` array contains:
+
+| Field                   | Field Description                                                                 | Data Type |
+|--------------------------|-----------------------------------------------------------------------------------|-----------|
+| PaidDate                 | Date when the payment was made, in YYYY-MM-DD format                              | String    |
+| PaymentAmount            | Amount of the payment                                                             | Number    |
+| TransactionDescription   | Description of the transaction type (e.g., "ACH", "Check", "Wire", "Correction") | String    |
 
 ### Additional Customer Information (Optional)
 
 | Field                   | Field Description                                                                 | Data Type |
 |--------------------------|-----------------------------------------------------------------------------------|-----------|
-| SecondaryContactName    | Name of secondary contact or co-borrower (if any)                                | String    |
-| SecondaryContactPhone   | Phone number of secondary contact (if any)                                        | String    |
-| SecondaryContactDOB     | Date of birth of secondary contact (if any)                                       | String    |
+| Coborrowers             | Array of co-borrower information (supports 'n' number of co-borrowers)            | Array[JSON] |
 | CustomField1            | Organization-specific custom field                                                | String    |
 | CustomField2            | Organization-specific custom field                                                | String    |
 | CustomField3            | Organization-specific custom field                                                | String    |
+
+#### Coborrower Object Structure
+
+Each coborrower object in the `Coborrowers` array contains:
+
+| Field                   | Field Description                                                                 | Data Type |
+|--------------------------|-----------------------------------------------------------------------------------|-----------|
+| Name                    | Full name of the co-borrower                                                      | String    |
+| PhoneNumber             | Phone number of the co-borrower                                                   | String    |
+| DOB                     | Date of birth of the co-borrower, in YYYY-MM-DD format                            | String    |
+| Email                   | Email address of the co-borrower (optional)                                       | String    |
+| PreferredLanguage       | Code indicating the co-borrower's preferred language (e.g., en=English, es=Spanish) (optional) | String    |
 
 ### Example Data
 
@@ -124,10 +144,39 @@ See below for an example JSON schema of the datapoints above, with example data.
   "AccountStatus": "DELINQUENT",
   "LastContactDate": "2025-08-15",
   "CustomerFlags": [],
-  "PaymentHistory": "Paid 2025-08-28: $1250.00 | Paid 2025-07-28: $1245.12 | Paid 2025-06-29: $1275.89",
-  "SecondaryContactName": "Jane Smith",
-  "SecondaryContactPhone": "+19876543211",
-  "SecondaryContactDOB": "1975-06-16"
+  "PaymentHistory": [
+    {
+      "PaidDate": "2025-08-28",
+      "PaymentAmount": 1250.00,
+      "TransactionDescription": "ACH"
+    },
+    {
+      "PaidDate": "2025-07-28",
+      "PaymentAmount": 1245.12,
+      "TransactionDescription": "ACH"
+    },
+    {
+      "PaidDate": "2025-06-29",
+      "PaymentAmount": 1275.89,
+      "TransactionDescription": "ACH"
+    }
+  ],
+  "Coborrowers": [
+    {
+      "Name": "Jane Smith",
+      "PhoneNumber": "+19876543211",
+      "DOB": "1975-06-16",
+      "Email": "jane.smith@example.com",
+      "PreferredLanguage": "en"
+    },
+    {
+      "Name": "Robert Smith",
+      "PhoneNumber": "+19876543212",
+      "DOB": "1977-03-20",
+      "Email": "robert.smith@example.com",
+      "PreferredLanguage": "en"
+    }
+  ]
 }
 ```
 
@@ -148,15 +197,26 @@ Note: This endpoint triggers an automated collection call to the specified custo
 
 The request body should include the customer data fields configured for your organization. See the Data Requirements section above for available fields.
 
+**Optional Configuration Fields:**
+
+| Field | Description | Data Type | Default |
+|-------|-------------|-----------|---------|
+| `MaxPaymentLimit` | Maximum payment amount allowed for this entity. If not set, defaults to $10,000 configured on the agent. | Number | 10000 |
+| `MaxDate` | Maximum date allowed for payment scheduling (YYYY-MM-DD format). If not set, defaults to today's date configured on the agent. | String | Today |
+
 ```json
 {
   "FirstName": "string",
   "LastName": "string",
   "AccountID": "string",
   "PhoneNumber": "string",
+  "MaxPaymentLimit": 10000,
+  "MaxDate": "2025-12-31",
   // ... additional fields based on your configuration
 }
 ```
+
+**Note:** If `MaxPaymentLimit` or `MaxDate` are not provided in the request, default values will be configured on the agent (today's date for `MaxDate`, up to $10,000 for `MaxPaymentLimit`).
 
 #### Response
 
@@ -195,25 +255,98 @@ During a collection call, the agent needs access to a payment processing API it 
 
 #### Field Descriptions
 
+##### Required Fields
+
 | Field | Description | Data Type | Notes |
 |-------|-------------|-----------|--------|
 | `AccountID` | Customer account identifier | String | Must match existing account |
-| `PaymentAmount` | Amount to be processed | Number | Validated against business rules |
-| `PaymentDate` | Date when payment will be processed | String | Current or future date |
-| `PaymentMethodID` | Unique identifier for payment method | String | From customer's available methods |
-| `AccountNumberLastFour` | Last 4 digits of account number | String | For verification and display |
-| `PaymentType` | Type of payment being made | String | e.g., "REGULAR", "PARTIAL", "FULL" |
+| `PaymentAmount` | Total amount to be processed | Number | Validated against business rules |
+| `PaymentDate` | Date when payment will be processed | String | Current or future date (YYYY-MM-DD format) |
 
-#### Request Body
+##### Optional Payment Breakdown Fields
 
+| Field | Description | Data Type | Notes |
+|-------|-------------|-----------|--------|
+| `BasePayment` | Base payment amount (excluding principal and fees) | Number | Optional - provides granular payment breakdown |
+| `Principal` | Principal amount included in payment | Number | Optional - additional principal payment beyond base |
+| `LateFee` | Late fee amount included in payment | Number | Optional - late fee portion of payment |
+| `ScheduledDate` | Scheduled date for payment processing | String | Optional - specific scheduled date (YYYY-MM-DD format) |
+
+##### Payment Method Fields
+
+| Field | Description | Data Type | Notes |
+|-------|-------------|-----------|--------|
+| `PaymentMethodType` | Type of payment method | String | Required if using new account. Values: "NEW" or "EXISTING" |
+| `AccountType` | Type of bank account | String | Required for new accounts. Values: "CHECKING" or "SAVINGS" |
+| `RoutingNumber` | Bank routing number | String | Required for new accounts (9 digits) |
+| `AccountNumber` | Full bank account number | String | Required for new accounts |
+| `PaymentMethodID` | Unique identifier for existing payment method | String | Required for existing accounts - from customer's available methods |
+| `AccountNumberLastFour` | Last 4 digits of account number | String | Required for existing accounts - for verification and display |
+
+##### Additional Optional Fields
+
+| Field | Description | Data Type | Notes |
+|-------|-------------|-----------|--------|
+| `PaymentType` | Type of payment being made | String | Optional - e.g., "REGULAR", "PARTIAL", "FULL" |
+
+#### Request Body Examples
+
+**Example 1: Payment with existing account (minimal fields)**
 ```json
 {
-  "AccountID": "string",
-  "PaymentAmount": "number",
-  "PaymentDate": "YYYY-MM-DD",
-  "PaymentMethodID": "string",
-  "AccountNumberLastFour": "string",
-  "PaymentType": "string"
+  "AccountID": "ACC-1234567",
+  "PaymentAmount": 1250.00,
+  "PaymentDate": "2025-10-15",
+  "PaymentMethodType": "EXISTING",
+  "PaymentMethodID": "57bfcd39-cf7a-42e9-8934-ccfd95669868",
+  "AccountNumberLastFour": "1234"
+}
+```
+
+**Example 2: Payment with new account and granular breakdown**
+```json
+{
+  "AccountID": "ACC-1234567",
+  "PaymentAmount": 1750.00,
+  "PaymentDate": "2025-10-15",
+  "BasePayment": 1250.00,
+  "Principal": 200.00,
+  "LateFee": 50.00,
+  "ScheduledDate": "2025-10-15",
+  "PaymentMethodType": "NEW",
+  "AccountType": "CHECKING",
+  "RoutingNumber": "123456789",
+  "AccountNumber": "9876543210"
+}
+```
+
+**Example 3: Payment with existing account and granular breakdown**
+```json
+{
+  "AccountID": "ACC-1234567",
+  "PaymentAmount": 1750.00,
+  "PaymentDate": "2025-10-15",
+  "BasePayment": 1250.00,
+  "Principal": 200.00,
+  "LateFee": 50.00,
+  "ScheduledDate": "2025-10-15",
+  "PaymentMethodType": "EXISTING",
+  "PaymentMethodID": "57bfcd39-cf7a-42e9-8934-ccfd95669868",
+  "AccountNumberLastFour": "1234",
+  "PaymentType": "REGULAR"
+}
+```
+
+**Example 4: Payment with new savings account**
+```json
+{
+  "AccountID": "ACC-1234567",
+  "PaymentAmount": 1250.00,
+  "PaymentDate": "2025-10-15",
+  "PaymentMethodType": "NEW",
+  "AccountType": "SAVINGS",
+  "RoutingNumber": "987654321",
+  "AccountNumber": "1234567890"
 }
 ```
 
@@ -224,64 +357,132 @@ During a collection call, the agent needs access to a payment processing API it 
 - **Future Dating**: Configure how far in advance payments can be scheduled
 - **Payment Validation**: Custom validation rules can be implemented
 
+#### Field Validation Rules
+
+- **Payment Breakdown**: If `BasePayment`, `Principal`, or `LateFee` are provided, they should sum to `PaymentAmount` (with tolerance for rounding)
+- **Payment Method Type**: 
+  - If `PaymentMethodType` is "NEW": `AccountType`, `RoutingNumber`, and `AccountNumber` are required
+  - If `PaymentMethodType` is "EXISTING": `PaymentMethodID` and `AccountNumberLastFour` are required
+- **Routing Number**: Must be exactly 9 digits for new accounts
+- **Account Number**: Required for new accounts, must be valid account number format
+- **Account Type**: Must be either "CHECKING" or "SAVINGS" when `PaymentMethodType` is "NEW"
+- **Scheduled Date**: If provided, must be a valid date in YYYY-MM-DD format and within allowed future dating window
+
 ### 3. Post Call Webhook
 
 This webhook is triggered after each collection call completes. It provides call outcome data and customer responses to help you update your systems and determine next actions.
 
 #### Field Descriptions
 
-| Field | Description | Data Type | Notes |
-|-------|-------------|-----------|--------|
-| `CallID` | Unique identifier for this call session | String | Used for call tracking and retrieval |
-| `AccountID` | The account ID for this customer | String | From original trigger data |
-| `CustomerName` | Full name of the customer contacted | String | Verified during call |
-| `CallTimestamp` | When the call was completed | String | ISO 8601 format |
-| `CallDurationSeconds` | Length of the call in seconds | Number | Total talk time |
-| `CallOutcome` | Result of the call attempt | Enum | Connection status |
-| `CustomerVerified` | Whether customer identity was confirmed | Boolean | Based on verification process |
-| `PaymentCollected` | Whether payment was processed during call | Boolean | True if payment successful |
-| `PaymentDetails` | Payment transaction information | Object | Only populated if payment collected |
-| `PromiseToPay` | Payment commitment details | Object | Contains commitment status, amount, and date |
-| `ReasonForDelinquency` | Why the customer hasn't paid | String/Null | If applicable and collected |
-| `CallSummary` | AI-generated summary of the call | String | Key points and outcomes |
-| `NextSteps` | Recommended follow-up actions | String | Based on call outcome |
-| `ComplianceFlags` | Any compliance-related indicators | Object | DO_NOT_CALL, CEASE_DESIST, etc. |
-| `CustomData` | Organization-specific data collected | Object | Customizable fields |
+| Field | Description | Data Type | PII | Notes |
+|-------|-------------|-----------|-----|--------|
+| `KastleCallID` | Unique identifier for this call session | String | | Used for call tracking and retrieval. Will be "NA" if no call was made |
+| `AccountID` | The account ID for this customer | String | | From original trigger data |
+| `CustomerName` | Full name of the customer contacted | String | ⚠️ | Concatenation of FirstName and LastName from trigger data |
+| `BorrowerType` | Type of borrower contacted | Enum | | Allowed values: `Primary`, `Secondary`, `NA` |
+| `CallTimestamp` | When the call was completed | String | | ISO 8601 format (YYYY-MM-DDTHH:MM:SSZ). Will be "NA" if no call was made |
+| `CallDurationSeconds` | Length of the call in seconds | Number | | Total talk time. Will be 0 if no call was made |
+| `PastDueAmountInformed` | Whether the past due amount was communicated | Boolean | | True if amount was discussed |
+| `OccupancyStatus` | Current property occupancy status | Enum | | Allowed values: `Occupied`, `Vacant`, `Tenant`, `Unknown` |
+| `ReasonForDelinquency` | Why the customer is delinquent | String/Null | | Currently not implemented (set to null) |
+| `PromiseToPay` | Payment commitment details | Object | | Contains Collected (boolean), Amount (number or "N/A"), and Date (YYYY-MM-DD or "N/A") |
+| `KastleCallSummary` | AI-generated summary of the call | String | | Key points and outcomes. If call was suppressed or not made, contains reason |
+| `QRPCIndicator` | Qualified Right Party Contact indicator | Boolean | | True if verified customer was reached |
+| `CallOutcome` | Result of the call attempt | Enum | | Allowed values: `Connected`, `Voicemail`, `No Answer`, `Busy`, `Failed`, `Did Not Dial`, `Transferred`, `Warm Transferred`, `In Progress` |
+| `RPC` | Whether the customer confirmed their name | Boolean | | Right Party Contact indicator |
+| `BorrowerVerified` | Whether customer identity was confirmed | Boolean | | Based on DOB verification |
+| `PaymentCollected` | Whether payment was processed during call | Boolean | | True if payment successful |
+| `PaymentDetails` | Payment transaction information | Object/Null | ⚠️ | Only populated if payment collected. Contains PaymentAmount, PaymentDate, and AccountID |
+| `BorrowerDeceased` | Indicates if borrower is reported as deceased | Boolean | | Compliance flag for account handling |
+| `CeaseAndDesist` | Customer has requested to cease communication | Boolean | | Legal compliance indicator |
+| `DoNotCall` | Customer is on do-not-call list | Boolean | | Regulatory compliance flag |
+| `AttorneyCommunicationRequested` | Customer mentioned they are represented by an attorney | Boolean | | Used to change the person being contacted for account |
+| `AttorneyDetails` | Details of the customer's attorney | Object/Null | | Contains Name, Phone, Email. Null if AttorneyCommunicationRequested is false |
 
 #### Webhook Payload
 
 ```json
 {
-  "CallID": "string",
+  "KastleCallID": "string",
   "AccountID": "string",
   "CustomerName": "string",
+  "BorrowerType": "Primary|Secondary|NA",
   "CallTimestamp": "YYYY-MM-DDTHH:MM:SSZ",
   "CallDurationSeconds": "number",
-  "CallOutcome": "Connected|Voicemail|NoAnswer|Busy|Failed|DidNotDial",
-  "CustomerVerified": "boolean",
+  "PastDueAmountInformed": "boolean",
+  "OccupancyStatus": "Occupied|Vacant|Tenant|Unknown",
+  "ReasonForDelinquency": "string|null",
+  "PromiseToPay": {
+    "Collected": "boolean",
+    "Amount": "number|string",
+    "Date": "YYYY-MM-DD|string"
+  },
+  "KastleCallSummary": "string",
+  "QRPCIndicator": "boolean",
+  "CallOutcome": "Connected|Voicemail|NoAnswer|Busy|Failed|DidNotDial|Transferred|Warm Transferred|Warm Transfer Failed",
+  "RPC": "boolean",
+  "BorrowerVerified": "boolean",
   "PaymentCollected": "boolean",
   "PaymentDetails": {
     "PaymentAmount": "number",
     "PaymentDate": "YYYY-MM-DD",
-    "PaymentMethodID": "string",
-    "AccountNumberLastFour": "string",
+    "BasePayment": "number|null",
+    "Principal": "number|null",
+    "LateFee": "number|null",
+    "ScheduledDate": "YYYY-MM-DD|null",
+    "PaymentMethodType": "NEW|EXISTING",
+    "AccountType": "CHECKING|SAVINGS|null",
+    "PaymentMethodID": "string|null",
+    "AccountNumberLastFour": "string|null",
+    "RoutingNumber": "string|null",
     "TransactionID": "string"
   },
+  "BorrowerDeceased": "boolean",
+  "CeaseAndDesist": "boolean",
+  "DoNotCall": "boolean",
+  "AttorneyCommunicationRequested": "boolean",
+  "AttorneyDetails": {
+    "Name": "string",
+    "Phone": "string",
+    "Email": "string"
+  }
+}
+```
+
+#### Example Request
+
+```json
+{
+  "KastleCallID": "call_abc123xyz789",
+  "AccountID": "ACC-2024-001234",
+  "CustomerName": "John Smith",
+  "BorrowerType": "Primary",
+  "CallTimestamp": "2024-10-29T16:00:00Z",
+  "CallDurationSeconds": 245,
+  "PastDueAmountInformed": true,
+  "OccupancyStatus": "Occupied",
+  "ReasonForDelinquency": "Temporary loss of income due to medical leave",
   "PromiseToPay": {
-    "Collected": "boolean",
-    "Amount": "number|null",
-    "Date": "YYYY-MM-DD|null"
+    "Collected": true,
+    "Amount": 2500.00,
+    "Date": "2025-11-15"
   },
-  "ReasonForDelinquency": "string|null",
-  "CallSummary": "string",
-  "NextSteps": "string",
-  "ComplianceFlags": {
-    "DoNotCall": "boolean",
-    "CeaseAndDesist": "boolean",
-    "CustomerDeceased": "boolean",
-    "PreferNotToBeContacted": "boolean"
-  },
-  "CustomData": {}
+  "KastleCallSummary": "Reached primary customer. Confirmed property is occupied. Customer explained delinquency due to medical leave but expects to return to work soon. Committed to payment of $2,500 by November 15th to bring account current. Customer was cooperative and expressed intent to maintain account in good standing.",
+  "QRPCIndicator": true,
+  "CallOutcome": "Connected",
+  "RPC": true,
+  "BorrowerVerified": true,
+  "PaymentCollected": false,
+  "PaymentDetails": null,
+  "BorrowerDeceased": false,
+  "CeaseAndDesist": false,
+  "DoNotCall": false,
+  "AttorneyCommunicationRequested": true,
+  "AttorneyDetails": {
+    "Name": "Smith & Associates Law Firm",
+    "Phone": "555-123-4567",
+    "Email": "contact@smithlawfirm.com"
+  }
 }
 ```
 
