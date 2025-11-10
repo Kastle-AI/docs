@@ -7,52 +7,6 @@ Routing is handled through **DTMF input** — short sequences of keypress tones 
 To ensure seamless transfers, both systems coordinate on which digits correspond to each routing path.  
 Relcu defines the digit-to-path mapping, and Kastle’s Warm Transfer Agent sends those digits automatically during each transfer.
 
----
-
-## Call Flow Diagram
-
-```
- Borrower
-     │
-     ▼
-┌────────────────────┐
-│ Kastle Voice Agent │
-│  (identifies lead) │
-└─────────┬──────────┘
-          │
-          ▼
-┌────────────────────────┐
-│ Kastle Warm Transfer    │
-│  Agent                  │
-│  - Calls Relcu number   │
-│  - Sends DTMF digits    │
-└─────────┬──────────────┘
-          │
-          ▼
-┌────────────────────────┐
-│ Relcu IVR / Distribution│
-│  - Receives DTMF input  │
-│  - Routes call to team  │
-└─────────┬──────────────┘
-          │
-          ▼
-┌────────────────────────┐
-│ Loan Officer / Team     │
-│  Receives live transfer │
-└────────────────────────┘
-          ▲
-          │
-          │ (Lead data + DTMF digits)
-          │
-┌────────────────────────┐
-│ Relcu → Kastle Data Feed│
-│  - Sends lead details   │
-│  - Includes DTMF digits │
-└────────────────────────┘
-```
-
----
-
 ## Call Flow Description
 
 1. **Kastle Voice Agent A**  
